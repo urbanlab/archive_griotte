@@ -34,8 +34,35 @@ class SoundHandlerMock
   end
 end
 
-describe "Raspeomix::Sound" do
+def check_sound(device="Master")
+#  output = %x{amixer get #{device}}
+#  output.each_line do |l|
+#    if l[0] = ' '
+#      l
+#    end
+# end
+  []
+end
 
+describe "Raspeomix::SoundHandler" do
+  it "should raise 'not implemented' for all methods" do
+    s = SoundHandler.new
+    [ :mute!, :unmute!, :muted?, :volume=, :volume ].each do |m|
+      expect { s.send(:mute) }.to raise_error
+    end
+  end
+end
+
+describe "Raspeomix::SoundHandlerAlsa" do
+  s = SoundHandlerAlsa.new
+
+  it "should mute Master sound" do
+    s.mute!
+    check_sound.should include(:muted)
+  end
+end
+
+describe "Raspeomix::Sound" do
   before(:each) do
     # We do not want to issue calls to Faye
     Sound.any_instance.stub(:register).and_return(true)

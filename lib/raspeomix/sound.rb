@@ -5,16 +5,41 @@ module Raspeomix
   class VolumeOutOfBoundsError < ArgumentError; end
 
   class SoundHandler
+    def initialize(target="")
+    end
+
+    def mute!
+      raise "Not implemented"
+    end
+
+    def unmute!
+      raise "Not implemented"
+    end
+
+    def muted?
+      raise "Not implemented"
+    end
+
+    def volume
+      raise "Not implemented"
+    end
+
+    def volume=(value)
+      raise "Not implemented"
+    end
+  end
+
+  class SoundHandlerAlsa < SoundHandler
     def initialize(target="Master")
       @target = target
     end
 
     def mute!
-      system("amixer set #{target} unmute")
+      system("amixer set #{@target} unmute")
     end
 
     def unmute!
-      system("amixer set #{target} unmute")
+      system("amixer set #{@target} unmute")
     end
 
     def muted?
