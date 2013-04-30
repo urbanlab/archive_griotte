@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Raspberry Faye Demo</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <script src="/js/jquery-1.9.1.js" type="text/javascript"></script>
+  <script src="/js/raspberry.js" type="text/javascript"></script>
+  <script src="/faye/client.js" type="text/javascript"></script>
+</head>
+<body>
+
+
+<div class="row">
+  <div class="span8 offset1">
+    <div class="page-header">
+      <h1>Raspberry 𝛑<small> Websocket Test</small></h1>
+    </div>
+    <div class="well">
+      <legend id="hostname">Legend</legend>
+      <div class="row">
+        <div class="span1"><div class="label">Heartbeat</div></div>
+        <div class="span2"><img id="heartbeat" height=18 width=20 src="img/raspberry_pi.png"></div>
+      </div>
+
+      <div class="row">
+        <div class="span1"><div class="label">Transport</div></div>
+        <div class="span2"><span id="transport"></span></div>
+      </div>
+
+      <div class="row">
+        <div class="span1"><div class="label">Sound</div></div>
+        <div class="span2"><input type="checkbox" id="soundmute"> Mute sound</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+</div>
+
+</body>
+<script type="text/javascript">
+//  Faye.Logging.logLevel = 'debug';
+
+  var scheme = window.location.protocol,
+  host   = location.hostname,
+  port   = 9292, // location.port,
+  path   = '/faye';
+
+
+$("#hostname").text(host);
+
+Bayeux = new Faye.Client(scheme + '//' + host + (port ? ':' + port : '') + path);
+Bayeux.disable('cross-origin-long-polling');
+Bayeux.addExtension(Logger);
+
+Raspberry.init(Bayeux);
+Raspberry.launch();
+
+</script>
+
+<script type="text/javascript">
+$("#soundmute").click(function() {
+  console.log($(this));
+  Raspberry.sound($(this).is(':checked'))
+});
+</script>
+
+<script src="js/bootstrap.min.js"></script>
+
+</html>
