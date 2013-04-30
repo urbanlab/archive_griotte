@@ -1,10 +1,40 @@
 require 'raspeomix/system'
 
 module Raspeomix
+
+  class VolumeOutOfBoundsError < ArgumentError; end
+
+  class SoundHandler
+    def initialize(target="Master")
+      @target = target
+    end
+
+    def mute!
+      system("amixer set #{target} unmute")
+    end
+
+    def unmute!
+      system("amixer set #{target} unmute")
+    end
+
+    def muted?
+      raise "Not implemented"
+    end
+
+    def volume
+      raise "Not implemented"
+    end
+
+    def volume=(value)
+      raise "Not implemented"
+    end
+  end
+
   class Sound
     include FayeClient
 
-    def initialize()
+    def initialize( handler=SoundHandler.new("PCM") )
+      @handler = handler
       register
     end
 
@@ -15,11 +45,32 @@ module Raspeomix
       subscribe('/sound') do |message|
         puts message.inspect
         if message['state']
-          `amixer set Master unmute`
+          unmute
         else
-          `amixer set Master mute`
+          mute
         end
       end
+    end
+
+    def mute!
+      @handler.mute!
+    end
+
+    def muted?
+      @handler.muted?
+    end
+
+    def unmute!
+      @handler.unmute!
+    end
+
+    def volume=(value)
+      (0..100) === value or raise VolumeOutOfBoundsError
+      @handler.volume = value
+    end
+
+    def volume
+      @handler.volume
     end
 
     def start_heartbeat
