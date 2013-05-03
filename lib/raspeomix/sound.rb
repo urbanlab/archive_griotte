@@ -57,7 +57,7 @@ module Raspeomix
       value >= 0 or raise VolumeOutOfBoundsError
       value <= 100 or raise VolumeOutOfBoundsError
 
-      parse_amixer("amixer set Master #{value}%")
+      parse_amixer("amixer set #{@status['channel']} #{value}%")
     end
 
     private
@@ -112,6 +112,7 @@ module Raspeomix
     def initialize(handler = SoundHandler.new)
       @handler = handler
       register
+      start_heartbeat
     end
 
 
@@ -119,11 +120,10 @@ module Raspeomix
       publish('/system/register', { :text => "alive", :origin => self.class.to_s } )
 
       subscribe('/sound') do |message|
-        puts message.inspect
         if message['state']
-          unmute
+          unmute!
         else
-          mute
+          mute!
         end
       end
     end
@@ -150,9 +150,8 @@ module Raspeomix
     end
 
     def start_heartbeat
-      EM.add_periodic_timer(2) {
-        puts "Sending heartbeat"
-        publish('/heartbeats', { :text => "alive", :origin => self.class.to_s } )
+      EM.add_periodic_timer(5) {
+        publish('/heartbeats', { :text => "alive", :origin => self.class.to_s }, :subsystem => :sound )
       }
     end
   end

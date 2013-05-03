@@ -3,5 +3,6 @@
 require 'raspeomix'
 
 EM.run {
-  client = Raspeomix::Sound.new
+  client = Raspeomix::Sound.new(Raspeomix::SoundHandlerAlsa.new)
 }
+

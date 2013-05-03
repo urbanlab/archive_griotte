@@ -18,6 +18,7 @@ module Raspeomix
 
     def subscribe(channel)
       channel[0] == '/' or raise ArgumentError
+      publish("/debug", { :msg => "Subscribing to #{nick}#{channel}" })
 
       faye.subscribe("/#{nick}#{channel}") do |message|
         yield message if block_given?

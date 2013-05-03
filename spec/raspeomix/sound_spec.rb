@@ -69,6 +69,7 @@ describe "Raspeomix::Sound" do
     Sound.any_instance.stub(:register).and_return(true)
     Sound.any_instance.stub(:publish).and_return(true)
     Sound.any_instance.stub(:subscribe).and_return(true)
+    Sound.any_instance.stub(:start_heartbeat).and_return(true)
 
     @snd = Sound.new(SoundHandlerAlsa.new)
   end
