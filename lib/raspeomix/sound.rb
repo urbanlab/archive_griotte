@@ -120,7 +120,11 @@ module Raspeomix
       publish('/system/register', { :text => "alive", :origin => self.class.to_s } )
 
       subscribe('/sound') do |message|
-        if message['state']
+        puts message.inspect
+        vol = message['volume'].to_i rescue volume
+        self.volume=(vol)
+
+        if message['state'] == 'on'
           unmute!
         else
           mute!
@@ -141,6 +145,7 @@ module Raspeomix
     end
 
     def volume=(value)
+      puts "Changing volume to #{value}"
       (0..100) === value or raise VolumeOutOfBoundsError
       @handler.volume = value
     end
@@ -151,7 +156,7 @@ module Raspeomix
 
     def start_heartbeat
       EM.add_periodic_timer(5) {
-        publish('/heartbeats', { :text => "alive", :origin => self.class.to_s }, :subsystem => :sound )
+        publish('/heartbeats', { :text => "alive", :origin => self.class.to_s, :subsystem => :sound })
       }
     end
   end

@@ -63,8 +63,8 @@ Raspberry = {
     this._heartbeat.fadeIn(500, function() { $(this).fadeOut(500); } );
   },
 
-  sound: function(state) {
-    this._bayeux.publish('/' + this._prefix + '/sound', {state: state});
+  sound: function(state, volume) {
+    this._bayeux.publish('/' + this._prefix + '/sound', {state: state, volume: volume});
   }
 };
 

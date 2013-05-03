@@ -4,18 +4,54 @@
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <title>Raspberry Faye Demo</title>
-  <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/css/jquery.mobile-1.3.1.min.css" rel="stylesheet" media="screen">
   <script src="/js/jquery-1.9.1.js" type="text/javascript"></script>
+  <script src="/js/jquery.mobile-1.3.1.js" type="text/javascript"></script>
   <script src="/js/raspberry.js" type="text/javascript"></script>
   <script src="/faye/client.js" type="text/javascript"></script>
 </head>
 <body>
 
 
+  <div data-role="page">
+    <header data-role="header">
+      <h1>Raspberry 𝛑<small> Websocket Test</small></h1>
+    </header>
+
+    <article data-role="content">
+      <div data-role="collapsible-set" data-theme="c" data-content-theme="d">
+         <div data-role="collapsible">
+          <h3>Son</h3>
+          <form>
+            <div class="ui-grid-a">
+              <div class="ui-block-a">
+                <label for="volume">Volume:</label>
+                <input type="range" name="volume" id="volume" min="0" max="100" value="50" data-mini="true">
+              </div>
+              <div class="ui-block-b">
+                <label for="mute">Son:</label>
+                <select name="mute" id="mute" data-role="slider" data-mini="true">
+                  <option value="off">Off</option>
+                  <option value="on">On</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div data-role="collapsible">
+          <h3>Langue</h3>
+        </div>
+        <div data-role="collapsible" data-collapsed-icon="gear">
+          <h3>Paramètres</h3>
+        </div>
+      </div>
+    </article>
+  </div>
+
+<!--
 <div class="row">
   <div class="span8 offset1">
     <div class="page-header">
-      <h1>Raspberry 𝛑<small> Websocket Test</small></h1>
     </div>
     <div class="well">
       <legend id="hostname">Legend</legend>
@@ -36,9 +72,7 @@
     </div>
   </div>
 </div>
-
-<div>
-</div>
+-->
 
 </body>
 <script type="text/javascript">
@@ -61,13 +95,13 @@ Raspberry.launch();
 
 </script>
 
+<script src="/js/sound.js" type="text/javascript"></script>
+
 <script type="text/javascript">
 $("#soundmute").click(function() {
   console.log($(this));
-  Raspberry.sound($(this).is(':checked'))
+//  Raspberry.sound($(this).is(':checked'), )
 });
 </script>
-
-<script src="js/bootstrap.min.js"></script>
 
 </html>
