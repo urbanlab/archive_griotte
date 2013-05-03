@@ -5,7 +5,7 @@ module Raspeomix
   class VolumeOutOfBoundsError < ArgumentError; end
 
   class SoundHandler
-    def initialize(target="")
+    def initialize(channel=nil)
     end
 
     def mute!
@@ -30,35 +30,86 @@ module Raspeomix
   end
 
   class SoundHandlerAlsa < SoundHandler
-    def initialize(target="Master")
-      @target = target
+    def initialize(channel=nil)
+      @status = Hash.new
+      @status['channel'] = channel
+      detect_channel unless channel
+      parse_amixer("amixer get #{@status['channel']}")
     end
 
     def mute!
-      system("amixer set #{@target} unmute")
+      parse_amixer("amixer set #{@status['channel']} mute")
     end
 
     def unmute!
-      system("amixer set #{@target} unmute")
+      parse_amixer("amixer set #{@status['channel']} unmute")
     end
 
     def muted?
-      raise "Not implemented"
+      @status['muted']
     end
 
     def volume
-      raise "Not implemented"
+      @status['volume']
     end
 
     def volume=(value)
-      raise "Not implemented"
+      value >= 0 or raise VolumeOutOfBoundsError
+      value <= 100 or raise VolumeOutOfBoundsError
+
+      parse_amixer("amixer set Master #{value}%")
     end
+
+    private
+
+    def detect_channel
+      output = %x(amixer scontrols)
+      controls = Array.new
+      re = %r{Simple mixer control '(.*)'}
+      output.each_line do |l|
+        controls << re.match(l)[1].to_sym
+      end
+
+      # Preferred channels from least to most wanted
+      [ :PCM, :Master ].each do |c|
+        @status['channel'] = c if controls.include?(c)
+      end
+    end
+
+    def parse_amixer(command)
+      output = %x(#{command})
+
+      mixer = Hash.new
+
+      output.each_line do |l|
+        k,v = l.chomp.split(/:/).map(&:lstrip)
+        # v will be mepty for the first line since it doesn't contain ':'
+        mixer[k] = v if v
+      end
+
+      # Parses sound status (volume, mute)
+      line = mixer[mixer['Playback channels']]
+
+      matches = %r{\[([^\[]*)\] \[([^\[]*)\] \[([^\[]*)\]}.match(line)
+      mixer['muted'] = case matches[3]
+                       when 'off'; true
+                       when 'on';  false
+                       else nil
+                       end
+
+      mixer['db']     = matches[2].gsub('dB','').to_i
+      mixer['volume'] = matches[1].gsub('%','').to_i
+
+      @status.merge!(mixer)
+    end
+
+
   end
 
   class Sound
     include FayeClient
 
-    def initialize( handler=SoundHandler.new("PCM") )
+    def initialize(handler = SoundHandler.new)
       @handler = handler
       register
     end

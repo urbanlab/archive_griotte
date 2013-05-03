@@ -7,8 +7,8 @@ include Raspeomix
 # Tried with double but couldn't conserver @muted state
 # between calls
 class SoundHandlerMock
-  def initialize(target="Master")
-    @target = target
+  def initialize(channel="Master")
+    @channel = channel
     @muted = false
     @volume = 0
   end
@@ -34,22 +34,13 @@ class SoundHandlerMock
   end
 end
 
-def check_sound(device="Master")
-#  output = %x{amixer get #{device}}
-#  output.each_line do |l|
-#    if l[0] = ' '
-#      l
-#    end
-# end
-  []
-end
-
 describe "Raspeomix::SoundHandler" do
   it "should raise 'not implemented' for all methods" do
     s = SoundHandler.new
-    [ :mute!, :unmute!, :muted?, :volume=, :volume ].each do |m|
-      expect { s.send(:mute) }.to raise_error
+    [ :mute!, :unmute!, :muted?, :volume ].each do |m|
+      expect { s.send(m) }.to raise_error(RuntimeError)
     end
+    expect { s.volume=42 }.to raise_error(RuntimeError)
   end
 end
 
@@ -58,7 +49,17 @@ describe "Raspeomix::SoundHandlerAlsa" do
 
   it "should mute Master sound" do
     s.mute!
-    check_sound.should include(:muted)
+    s.muted?.should be true
+  end
+
+  it "should unmute Master sound" do
+    s.unmute!
+    s.muted?.should be false
+  end
+
+  it "should remute Master sound" do
+    s.mute!
+    s.muted?.should be true
   end
 end
 
@@ -69,7 +70,7 @@ describe "Raspeomix::Sound" do
     Sound.any_instance.stub(:publish).and_return(true)
     Sound.any_instance.stub(:subscribe).and_return(true)
 
-    @snd = Sound.new(SoundHandlerMock.new)
+    @snd = Sound.new(SoundHandlerAlsa.new)
   end
 
   it "accepts mute message" do
@@ -86,19 +87,18 @@ describe "Raspeomix::Sound" do
     3.times do
       vol = rand(100)
       @snd.volume=vol
-      @snd.volume.should equal vol
+      # Alsa is not very precise...
+      expect(@snd.volume).to be_within(1).of vol
       @snd.volume.should be_a_kind_of(Fixnum)
     end
   end
 
   it "refuses volumes below 0" do
     expect { @snd.volume=-1 }.to raise_error(VolumeOutOfBoundsError)
-    @snd.volume.should be >= 0
   end
 
   it "refuses volumes over 100" do
     expect { @snd.volume=101 }.to raise_error(VolumeOutOfBoundsError)
-    @snd.volume.should be <= 100
   end
-
 end
+
