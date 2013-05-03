@@ -1,3 +1,5 @@
+.rspec
+.ruby-version
 .tags
 coverage/
-
+tmp/
