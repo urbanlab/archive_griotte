@@ -11,6 +11,15 @@
   <script src="/js/jquery.ui.touch-punch.min.js" type="text/javascript"></script>
   <script src="/js/raspberry.js" type="text/javascript"></script>
   <script src="/faye/client.js" type="text/javascript"></script>
+<style>
+    /* Hide the delete button on touch devices */
+    .touch .delete {
+      display: none;
+    }
+    .touch .ui-link-inherit {
+      padding-right: 15px !important;
+    }
+</style>
 </head>
 <body>
 
@@ -31,9 +40,9 @@
       <div data-role="header">
         <h3>Eléments</h3>
       </div>
-      <ul data-role="listview" data-inset="true" data-theme="d" id="sortable">
+      <ul data-role="listview" data-inset="true" data-theme="d" id="medias">
         <!--        <li data-role="list-divider" class="ui-state-disabled">Scénario A</li>-->
-        <li data-theme="e"><a href="#"><small>Capteur mouvement A</small></a></li>
+        <li data-theme="e"><a href="#" class="mediaitem"><small>Capteur mouvement A</small></a></li>
         <li data-theme="e"><a href="#"><small>Capteur lumière B</small></a></li>
         <li data-theme="e"><a href="#"><small>Capteur température C</small></a></li>
         <li><a href="#"><small>God_save_Richard_Stallman.ogg</small></a></li>
@@ -49,9 +58,9 @@
         <div data-role="collapsible">
           <h3>Scenario A</h3>
 
-          <ul data-role="listview" data-inset="true" data-theme="d" id="sortable">
+          <ul data-role="listview" data-inset="true" data-theme="d" id="scenario-elements" class="touch">
             <!--        <li data-role="list-divider" class="ui-state-disabled">Scénario A</li>-->
-            <li>Marseillaise.avi</li>
+            <li>Marseillaise.avi</li><a href="#" class="delete">Delete</a>
             <li data-theme="e">Capteur mouvement A</li>
             <li>God_save_the_Queen.mp3</li>
             <li>God_save_Richard_Stallman.ogg</li>
