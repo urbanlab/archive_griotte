@@ -145,7 +145,7 @@ module Raspeomix
     end
 
     def volume=(value)
-      puts "Changing volume to #{value}"
+      #puts "Changing volume to #{value}"
       (0..100) === value or raise VolumeOutOfBoundsError
       @handler.volume = value
     end

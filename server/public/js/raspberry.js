@@ -42,7 +42,8 @@ Raspberry = {
    */
   launch: function() {
     var self = this;
-    this._bayeux.subscribe('/' + this._prefix + '/heartbeats', this.accept, this);
+    //this._bayeux.subscribe('/' + this._prefix + '/heartbeats', this.accept, this);
+    this._bayeux.subscribe('/heartbeats', this.accept, this);
 
     // Detect network problems and disable the form when offline
     this._bayeux.bind('transport:down', function() {
