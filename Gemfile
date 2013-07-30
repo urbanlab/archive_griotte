@@ -5,6 +5,7 @@ gem 'faye'
 gem 'sinatra'
 
 group :development do
+  gem 'rubysdl'
   gem 'rspec'
   gem 'simplecov'
   gem 'guard'
