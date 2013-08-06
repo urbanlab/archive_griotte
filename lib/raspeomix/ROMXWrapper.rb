@@ -42,13 +42,13 @@ module Raspeomix
 
     def initialize(server_ip)
       @playing = false
-      @fifo = Fifo.new
       @level = 0
       #Faye client will warn videoclient when playback is over
       @client = Faye::Client.new("http://#{server_ip}:9292/faye")
     end
 
     def load(file)
+      @fifo = Fifo.new
       @pipe = EM.popen3( "omxplayer -s #{file} < #{@fifo.path}", {
         :stdout => Proc.new { |data|
           data.each_line { |line| parse_line(line) }

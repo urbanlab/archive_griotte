@@ -26,9 +26,8 @@ module Raspeomix
 
     def register(server_ip)
       $log.debug("registering...")
-      @client = Faye::Client.new("http://#{server_ip}:9292/faye") #TODO : 9292 --> 3245 ( = 3245|v|3 = erasme) super !
-      @client.subscribe("/#{@properties[:type].to_s}/command") { |m| puts "yihaa"
-                                                                 handle_message(:command, m) }
+      @client = Faye::Client.new("http://#{server_ip}:9292/faye")
+      @client.subscribe("/#{@properties[:type].to_s}/command") { |m| handle_message(:command, m) }
       #if this client is sound or video, we have to check when the playback is over
       case @properties[:type]
       when :video,  :sound

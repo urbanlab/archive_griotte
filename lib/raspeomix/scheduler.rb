@@ -76,7 +76,7 @@ module Raspeomix
       EM.stop_event_loop
     end
 
-    def run_test
+    def run_video_test
       EM.run {
         load("/media/external/videofinale.mp4", :video)
         EM.add_timer(3){
@@ -97,5 +97,16 @@ module Raspeomix
       }
     end
 
+    def run_image_test
+      EM.run {
+        load("/media/external/P1040851.JPG", :image)
+        EM.add_timer(1){
+          start(:image)
+        }
+        EM.add_timer(5){
+          stop(:image)
+        }
+      }
+    end
   end
 end
