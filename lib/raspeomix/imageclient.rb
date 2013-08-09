@@ -24,16 +24,21 @@ module Raspeomix
       change_state(:ready)
     end
 
-    def start
-      @screen = Screen.open([500,500])
+    def start(time)
+      resolution = Screen.get_resolution
+      @screen = Screen.open(resolution)
       @image.blit(@screen,[0,0])
       @screen.update
       @screen.show_cursor = false
       change_state(:playing)
+      EM.add_timer(time) {
+        stop
+      }
     end
 
     def stop
       Screen.close
+      change_state(:stopped)
       change_state(:idle)
     end
 

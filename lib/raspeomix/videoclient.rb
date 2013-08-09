@@ -21,7 +21,8 @@ module Raspeomix
       end
     end
 
-    def start
+    def start(time)
+      #time not implemented
       if @handler.start
         change_state(:playing)
       else

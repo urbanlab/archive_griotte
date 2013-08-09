@@ -8,7 +8,7 @@ require 'securerandom'
 
 module Raspeomix
 
-  #this class is used to send input to OMXPlayer
+  #class sending input to OMXPlayer
   class Fifo
 
     attr_reader :path
@@ -24,7 +24,6 @@ module Raspeomix
 
     def send(char)
       open(@path, "w+") { |f| f.write(char) }
-      puts "char #{char} sent"
     end
 
     def close
@@ -42,13 +41,13 @@ module Raspeomix
 
     def initialize(server_ip)
       @playing = false
+      @fifo = Fifo.new
       @level = 0
       #Faye client will warn videoclient when playback is over
       @client = Faye::Client.new("http://#{server_ip}:9292/faye")
     end
 
     def load(file)
-      @fifo = Fifo.new
       @pipe = EM.popen3( "omxplayer -s #{file} < #{@fifo.path}", {
         :stdout => Proc.new { |data|
           data.each_line { |line| parse_line(line) }
@@ -83,8 +82,8 @@ module Raspeomix
       @fifo.send(QUITCHAR)
       sleep 1
       @fifo.close
+      #can be done better
       #Process::waitpid(@pipe.pid)
-      #this is ugly, fix this
       return true
     end
 
@@ -109,7 +108,7 @@ module Raspeomix
     def parse_line(line)
       case line.scan(/\w+/)[0]
       when "have"
-        @client.publish("/OMX", 'stopped')
+        @client.publish("/OMX", { :state => "stopped" })
       end
     end
 

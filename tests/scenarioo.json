@@ -1,0 +1,11 @@
+{
+  "id" : "scenario2",
+  "priority" : 2,
+  "media_number" : 3,
+  "loop" : true,
+
+  "medias" : [
+  { "file" : "videofinale.mp4", "type" : "video" },
+  { "file" : "P1040851.JPG", "type" : "image" }
+  ]
+}

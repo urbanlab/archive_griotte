@@ -31,7 +31,7 @@ module Raspeomix
       #if this client is sound or video, we have to check when the playback is over
       case @properties[:type]
       when :video,  :sound
-        @client.subscribe("/OMX") { |m| change_state(:idle) if m=='stopped' }
+        @client.subscribe("/OMX") { |m| change_state(:idle) if m["state"] = "stopped" }
       end
       change_state(:idle)
       $log.debug("registered")
@@ -41,7 +41,6 @@ module Raspeomix
       $log.debug("message received : #{message}")
       if messagetype == :command
         command = JSON.parse(message, :symbolize_names => true)
-        puts "command : #{command}"
         if method(command[:action]).arity != 0
           self.send(command[:action], command[:arg])
         else
