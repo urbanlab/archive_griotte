@@ -3,9 +3,8 @@
   "priority" : 1,
   "media_count" : 2,
   "loop" : true,
-
   "medias" : [
-  { "file" : "/media/external/detected.mp3", "type" : "video" },
+  { "file" : "/media/external/videofinale.mp4", "type" : "video" },
   { "file" : "/media/external/P1040851.JPG", "type" : "image", "time" : 10 }
   ]
 }

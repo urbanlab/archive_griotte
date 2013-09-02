@@ -13,58 +13,63 @@ $log.level = Logger::DEBUG
 
 module Raspeomix
 
-  class Scheduler
+  module Client
 
-    def initialize(server_ip)
+   class Scheduler
+
+     include FayeClient
+
+    def initialize
       $log.debug("initializing...")
-      @server_add = "http://#{server_ip}:9292/faye"
+      start_client('localhost', 9292)
+      @server_add = "http://localhost:9292/faye"
       @scenario_handler = ScenarioHandler.new
       register
     end
 
     def register
       $log.debug("registering...")
-      @client = Faye::Client.new(@server_add)
-      @client.subscribe("/video/state") { |message| handle_state(:video, message, @scenario_handler) }
-      @client.subscribe("/image/state") { |message| handle_state(:image, message, @scenario_handler) }
-      @client.subscribe("/OMX") { |message| handle_state(:video, message, @scenario_handler) }
-      @client.subscribe("/captors/signal") { |signal| handle_captor_signal(signal) }
+      subscribe("/video/out") { |message| handle_state(:video, message, @scenario_handler) }
+      subscribe("/image/out") { |message| handle_state(:image, message, @scenario_handler) }
+      subscribe("/OMX") { |message| handle_state(:video, message, @scenario_handler) }
+      subscribe("/captors/signal") { |signal| handle_captor_signal(signal) }
       $log.debug("registered")
     end
 
     def load(file, client)
       $log.debug("loading #{file} on #{client}")
-      @client.publish("/#{client}/command", { :action => :load, :arg => file }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :load, :arg => file }.to_json)
     end
 
     def start(client, time)
       $log.debug("starting #{client}")
-      @client.publish("/#{client}/command", { :action => :start, :arg => time }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :start, :arg => time }.to_json)
     end
 
     def play(client)
       $log.debug("sending play to #{client}")
-      @client.publish("/#{client}/command", { :action => :play }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :play }.to_json)
     end
 
     def pause(client)
       $log.debug("sending pause to #{client}")
-      @client.publish("/#{client}/command", { :action => :pause }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :pause }.to_json)
     end
 
     def stop(client)
       $log.debug("stopping #{client}")
-      @client.publish("/#{client}/command", { :action => :stop }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :stop }.to_json)
     end
 
     def set_level(level, client)
       $log.debug("setting #{client} level to #{level}")
-      @client.publish("/#{client}/command", { :action => :set_level, :arg => "#{level}" }.to_json)
+      publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => "#{level}" }.to_json)
     end
 
     def handle_state(client, message, scenario_handler)
-      $log.debug (" ------------------ client \"#{client}\" sent message : #{message}")
-      case message["state"]
+      $log.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
+      parsed_msg = JSON.parse(message, :symbolize_names => true)
+      case parsed_msg[:state]
       when "ready" then
         start(client, scenario_handler.playing_media[:time]) if scenario_handler.is_client_active?(client)
       when "stopped" then
@@ -118,4 +123,5 @@ module Raspeomix
       }
     end
   end
+end
 end

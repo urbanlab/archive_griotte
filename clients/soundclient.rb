@@ -3,5 +3,5 @@
 require 'raspeomix'
 
 EM.run {
-  client = Raspeomix::Client::Video.new
+  client = Raspeomix::Client::Sound.new
 }

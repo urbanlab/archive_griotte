@@ -3,5 +3,5 @@
 require 'raspeomix'
 
 EM.run {
-  client = Raspeomix::ImageClient.new("192.168.1.48")
+  client = Raspeomix::Client::Image.new
 }
