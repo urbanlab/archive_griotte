@@ -15,18 +15,26 @@ module EventMachine
 
     attr_reader :queue
 
-    def initialize (queue)
-      @queue = queue
- #     log __method__, queue
+    def initialize (i_queue, o_queue)
+      @input_queue = i_queue
+      @output_queue = o_queue
+      input_check_loop
     end
 
     def receive_data data
       data.scan(OMX_REGEXP).each { |str| #log __method__,str
-                                   @queue.push(str)}
+                                   @output_queue.push(str)}
     end
 
     def unbind
-#      log __method__
+    end
+
+    def input_check_loop
+      EM.add_periodic_timer(0.5) {
+        @input_queue.pop { |char|
+          send_data(char)
+        }
+      }
     end
   end
 

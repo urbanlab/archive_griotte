@@ -51,6 +51,15 @@ module Raspeomix
         end
       end
 
+      def play
+        if @handler.play
+          update_state(:playing?)
+        else
+          $log.error("error while unpausing #{self.name} client")
+          update_state(:error)
+        end
+      end
+
       def stop
         if @handler.stop
           update_state(:idle?)
