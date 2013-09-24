@@ -1,5 +1,6 @@
 source "https://rubygems.org"
 
+gem "i2c"
 gem 'thin'
 gem 'faye'
 gem 'sinatra'
@@ -14,6 +15,7 @@ group :development do
   gem 'rb-fsevent', :require => false
   gem 'rb-fchange', :require => false
   gem 'libnotify'
+  gem 'yard'
 end
 
 

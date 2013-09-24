@@ -1,5 +1,7 @@
 .rspec
 .ruby-version
 .tags
+.yardoc
 coverage/
+doc/
 tmp/
