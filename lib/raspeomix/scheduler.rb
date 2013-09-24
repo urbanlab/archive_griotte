@@ -23,7 +23,7 @@ module Raspeomix
         $log.debug("initializing...")
         start_client('localhost', 9292)
         @server_add = "http://localhost:9292/faye"
-        @scenario_handler = ScenarioHandler.new
+        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
         register
         @playing = true
       end
@@ -36,7 +36,7 @@ module Raspeomix
         $log.debug("registering...")
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
-        subscribe("/sensor/out") { |message| handle_input_message(message) }
+        subscribe("/keyboard/out") { |message| handle_input_message(message) }
         $log.debug("registered")
       end
 
@@ -124,38 +124,6 @@ module Raspeomix
         load(@scenario_handler.playing_media[:file], @scenario_handler.playing_media[:type])
       end
 
-      def run_video_test
-        EM.run {
-          load("/media/external/videofinale.mp4", :video)
-          EM.add_timer(3){
-            start(:video)
-          }
-          EM.add_timer(6){
-            pause(:video)
-          }
-          EM.add_timer(9){
-            play(:video)
-          }
-          EM.add_timer(12){
-            set_level(90, :video)
-          }
-          EM.add_timer(15){
-            stop(:video)
-          }
-        }
-      end
-
-      def run_image_test
-        EM.run {
-          load("/media/external/P1040851.JPG", :image)
-          EM.add_timer(1){
-            start(:image)
-          }
-          EM.add_timer(5){
-            stop(:image)
-          }
-        }
-      end
     end
   end
 end

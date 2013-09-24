@@ -2,6 +2,7 @@
 #event handler for raspéomix
 #
 #Catches and transmits exterior events to Scheduler
+#For now only uses kayboard inputs
 
 require 'eventmachine'
 require 'faye'
@@ -26,23 +27,23 @@ module Raspeomix
       end
 
       def start
-        publish("/sensor/out", { :type => :event, :event => :start }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :start }.to_json)
       end
 
       def pause
-        publish("/sensor/out", { :type => :event, :event => :pause }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :pause }.to_json)
       end
 
       def play
-        publish("/sensor/out", { :type => :event, :event => :play }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :play }.to_json)
       end
 
       def stop
-        publish("/sensor/out", { :type => :event, :event => :stop, :arg => :media }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :stop, :arg => :media }.to_json)
       end
 
       def stop_all
-        publish("/sensor/out", { :type=> :event, :event =>:stop, :arg => :all }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type=> :event, :event =>:stop, :arg => :all }.to_json)
       end
 
     end

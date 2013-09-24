@@ -1,39 +1,15 @@
 #!/usr/bin/env ruby
 #
 #OMXPlayer ruby wrapper
-#sends inputs with named pipe
-#receives outputs with popen3
+#inputs and outputs are handled with EventMachine::Connection
 
 require 'securerandom'
 require 'eventmachine'
 require 'faye'
-require '~/dev/raspeomix/lib/liveprocess.rb'
+require 'json'
+require '/home/pi/dev/raspeomix/lib/liveprocess.rb'
 
 module Raspeomix
-
-  #class sending input to OMXPlayer
-  class Fifo
-
-    attr_reader :path
-
-    def initialize(path = "/tmp/fifo_#{SecureRandom.uuid}")
-      @path = path
-      %x{mkfifo #{@path}}
-    end
-
-    def start
-      send('.')
-    end
-
-    def send(char)
-      open(@path, "w+") { |f| f.write(char) }
-    end
-
-    def close
-      %x{rm #{@path}}
-    end
-
-  end
 
   class OMXWrapper
 
@@ -45,7 +21,6 @@ module Raspeomix
     def initialize(type, host, port)
       @type = type
       @playing = false
-      @fifo = Fifo.new
       @level = 0
       #Faye client will warn videoclient when playback is over
       @client = Faye::Client.new("http://#{host}:#{port}/faye")

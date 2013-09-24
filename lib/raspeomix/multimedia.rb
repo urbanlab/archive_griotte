@@ -3,6 +3,10 @@
 #multimedia client for Raspéomix
 #can be used to read images, sound and video
 
+require 'eventmachine'
+require 'faye'
+require 'json'
+
 module Raspeomix
 
   module Client

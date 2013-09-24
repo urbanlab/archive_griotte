@@ -3,7 +3,7 @@
 #Faye client for Raspéomix
 #Wraps Faye functions used by clients
 
-require 'raspeomix'
+require 'faye'
 
 module Raspeomix
 
