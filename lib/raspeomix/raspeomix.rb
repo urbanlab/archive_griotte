@@ -1,5 +1,11 @@
 require 'logger'
 
+class NullObject
+  def method_missing(*args, &block)
+    nil
+  end
+end
+
 module Raspeomix
   def self.logger
     @logger ||= initialize_log
@@ -10,7 +16,7 @@ module Raspeomix
   end
 
   def self.initialize_log
-    return unless ENV['RASP_LOG']
+    return NullObject.new unless ENV['RASP_LOG']
 
     @do_log = true
     log = ENV['RASP_LOG'] if (ENV['RASP_LOG'])
