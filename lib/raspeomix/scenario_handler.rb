@@ -11,7 +11,7 @@ module Raspeomix
 
     attr_reader :playing_media
 
-    def initialize
+    def initialize(scenario_path)
       @key_path = "/dev/sda"
       @media_path = "/media/external"
       @scenarios = []
@@ -20,7 +20,7 @@ module Raspeomix
       if Dir.entries(@media_path).size == 2 then
         %x{sudo mount #{@key_path} #{@media_path}}
       end
-      @scenarios = retrieve_scenarios("/home/pi/dev/raspeomix/tests")
+      @scenarios = retrieve_scenarios(scenario_path)
       @playing_scenario = choose_default(@scenarios)
       @playing_media = @playing_scenario[:medias][@index]
     end
@@ -60,4 +60,3 @@ module Raspeomix
     end
   end
 end
-

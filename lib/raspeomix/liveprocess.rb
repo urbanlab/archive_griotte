@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+#implements EM::Connection functions in order to control
+#an external process
 
 require 'eventmachine'
 
@@ -7,7 +9,6 @@ def log *message
 end
 
 module EventMachine
-
 
   OMX_REGEXP = /.*[^\r]\n/
 
@@ -39,12 +40,3 @@ module EventMachine
   end
 
 end
-
-#testing
-#EM.run {
-#  q = EM::Queue.new
-#  EM.popen ARGV[0], EM::LiveProcess, q
-#  EM.add_periodic_timer(0.1) {
-#    q.pop { |msg| puts msg }
-#  }
-#}

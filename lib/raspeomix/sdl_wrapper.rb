@@ -1,4 +1,4 @@
-#!/usr/bin/env 
+#!/usr/bin/env ruby 
 #Ruby SDL wrapper using rubygame to display images
 #TODO : checking function effects before returning true
 
