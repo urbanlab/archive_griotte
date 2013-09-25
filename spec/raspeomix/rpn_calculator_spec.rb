@@ -95,3 +95,8 @@ describe "RPNCalculator with single operand" do
   end
 end
 
+describe "RPNCalculator stack reduction" do
+  it "should return an array" do
+    RPNCalculator.reduce_stack("1 2 + 3 4 +").should be_an(Array)
+  end
+end
