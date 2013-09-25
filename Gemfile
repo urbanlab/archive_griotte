@@ -4,9 +4,10 @@ gem "i2c"
 gem 'thin'
 gem 'faye'
 gem 'sinatra'
+gem 'rubysdl'
+gem 'rubygame'
 
 group :development do
-  gem 'rubysdl'
   gem 'rspec'
   gem 'simplecov'
   gem 'guard'
