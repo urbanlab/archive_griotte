@@ -37,9 +37,9 @@ module Raspeomix
 
       # Channels
       CHANNEL = { :an0 => 0b00000000,
-                   :an1 => 0b00100000,
-                   :an2 => 0b01000000,
-                   :an3 => 0b01100000 }
+                  :an1 => 0b00100000,
+                  :an2 => 0b01000000,
+                  :an3 => 0b01100000 }
 
       # LSB in µV (cf datasheet table 4-1 p15)
       LSB = { :'12bits'  => 1000,
@@ -50,6 +50,7 @@ module Raspeomix
               :'60sps'   => 250,
               :'15sps'   => 62.5,
               :'3_75sps' => 15.625 }
+
       # Misc constants
       C_READY = 0b10000000   # ready bit
       C_OC_MODE = 0b00010000 # single shot mode
@@ -82,7 +83,7 @@ module Raspeomix
       #   :"60sps", :"15sps", :"3_75sps" which maps respectively to the
       #   resolution sympbols mentionned above.
       # One of :an0, :an1, :an2 or :an3
-      def get_channel(channel=:an0, resolution=:'18bits', pga=:'1x')
+      def sample(channel=:an0, resolution=:'18bits', pga=:'1x')
         bytes    = [ 0, 0, 0, 0 ]
 
         # Check arguments
