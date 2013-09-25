@@ -1,5 +1,12 @@
+# RPNCalculator accepts a RPN "string", with space separated operands and
+# operators, and evaluates the result
+
 class RPNCalculator
-  def self.evaluate(expression)
+  # Evaluates expression an returns the stack
+  #
+  # @param [String] expression RPN expression to evaluate (space separated)
+  # @return [Array] Results stack
+  def self.reduce_stack(expression)
     expression = expression.split
     operands = []
     evaluation = []
@@ -22,7 +29,15 @@ class RPNCalculator
         evaluation.push(false)
       end
     end
-    evaluation.pop
+    evaluation
+  end
+
+  # Evaluates expression an returns the last element on the stack
+  #
+  # @param [String] expression RPN expression to evaluate (space separated)
+  # @return [Float] Returns the last element of the evaluated stack
+  def self.evaluate(expression)
+    self.reduce_stack(expression).pop
   end
 end
 
