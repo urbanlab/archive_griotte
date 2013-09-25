@@ -1,6 +1,8 @@
 Raspberry Media Player
 ======================
 
+_This is WIP software - nothing usable yet_
+
 Raspberry+Faye multimedia player
 
 # Using
@@ -66,7 +68,7 @@ Plays sound.
 
 ## Sequencer
 
-Orders media playlist and drives SoungPlayer & VideoPlayer.
+Orders media playlist and drives SoundPlayer & VideoPlayer.
 
 ## Storage
 
