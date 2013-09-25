@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+
+require 'raspeomix/fayeclient'
 #
 #multimedia client for Raspéomix
 #can be used to read images, sound and video

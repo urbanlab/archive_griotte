@@ -13,9 +13,6 @@ require 'logger'
 require 'eventmachine'
 require 'faye'
 require 'open3'
-require '~/dev/raspeomix/lib/popen3'
-
-require 'raspeomix/system' #???
 
 $log = Logger.new(STDOUT)
 $log.level =Logger::DEBUG

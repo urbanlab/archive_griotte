@@ -7,7 +7,7 @@
 require 'securerandom'
 require 'eventmachine'
 require 'faye'
-require '~/dev/raspeomix/lib/liveprocess.rb'
+require 'liveprocess'
 
 module Raspeomix
 

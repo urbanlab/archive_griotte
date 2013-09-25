@@ -6,6 +6,7 @@
 
 require "i2c"
 require "i2c/i2c"
+require 'raspeomix/raspeomix'
 
 module Raspeomix
 
@@ -15,7 +16,6 @@ module Raspeomix
 
     # Class MCP342x handles MCP342x ADC communications
     class MCP342x
-      include Raspeomix::Reporter
 
       # Constants for configuration register, datasheet page 18
       #
