@@ -23,6 +23,10 @@ class RPNCalculator
       when "abs", "ceil", "floor"
         operands = evaluation.pop(1)
         evaluation.push(operands[0].send(x))
+      # from Math lib
+      when "sin", "cos", "tan", "asin", "acos", "atan", "sqrt"
+        operands = evaluation.pop(1)
+        evaluation.push(Math.send(x, operands[0]))
       when "true"
         evaluation.push(true)
       when "false"
@@ -41,3 +45,8 @@ class RPNCalculator
   end
 end
 
+# If library is called directly, it can be used as a standalone calculator
+
+if __FILE__ == $0
+  puts RPNCalculator.evaluate(ARGV.join(" "))
+end
