@@ -16,43 +16,55 @@ module Raspeomix
       # Constants for configuration register, datasheet page 18
       #
       # Sample rate selection bits (S1-S0)
-      RESOLUTION = { :'12bits' => 0b00000000,
-                     :'14bits' => 0b00000100,
-                     :'16bits' => 0b00001000,
-                     :'18bits' => 0b00001100,
-                     :'240sps'  => 0b00000000,
-                     :'60sps'   => 0b00000100,
-                     :'15sps'   => 0b00001000,
-                     :'3_75sps' => 0b00001100 }
+      RESOLUTION = { 
+        :'12bits' => 0b00000000,
+        :'14bits' => 0b00000100,
+        :'16bits' => 0b00001000,
+        :'18bits' => 0b00001100,
+        :'240sps'  => 0b00000000,
+        :'60sps'   => 0b00000100,
+        :'15sps'   => 0b00001000,
+        :'3_75sps' => 0b00001100
+      }
 
       # PGA settings
-      PGA = { :'1x' => 0b00000000,
-              :'2x' => 0b00000001,
-              :'4x' => 0b00000010,
-              :'8x' => 0b00000011 }
+      PGA = {
+        :'1x' => 0b00000000,
+        :'2x' => 0b00000001,
+        :'4x' => 0b00000010,
+        :'8x' => 0b00000011
+      }
 
       # Channels
-      CHANNEL = { :an0 => 0b00000000,
-                   :an1 => 0b00100000,
-                   :an2 => 0b01000000,
-                   :an3 => 0b01100000 }
+      CHANNEL = {
+        :an0 => 0b00000000,
+        :an1 => 0b00100000,
+        :an2 => 0b01000000,
+        :an3 => 0b01100000
+      }
 
       # LSB in µV (cf datasheet table 4-1 p15)
-      LSB = { :'12bits'  => 1000,
-              :'14bits'  => 250,
-              :'16bits'  => 62.5,
-              :'18bits'  => 15.625,
-              :'240sps'  => 1000,
-              :'60sps'   => 250,
-              :'15sps'   => 62.5,
-              :'3_75sps' => 15.625 }
-      # Misc constants
-      C_READY = 0b10000000   # ready bit
-      C_OC_MODE = 0b00010000 # single shot mode
+      LSB = {
+        :'12bits'  => 1000,
+        :'14bits'  => 250,
+        :'16bits'  => 62.5,
+        :'18bits'  => 15.625,
+        :'240sps'  => 1000,
+        :'60sps'   => 250,
+        :'15sps'   => 62.5,
+        :'3_75sps' => 15.625
+      }
 
-      # Resistors divider ratio (R20+R21)/R21 required to scale back input voltage
-      # Cf https://raw.github.com/hugokernel/RaspiOMix/master/export/1.0.1/images/schema.png
-      # Ratio for 4k7 / 10k
+      # Ready bit
+      C_READY = 0b10000000
+      ## Single shot mode
+      C_OC_MODE = 0b00010000
+
+      # Resistors divider ratio (R20+R21)/R21 required to scale back input voltage -
+      # see {https://raw.github.com/hugokernel/RaspiOMix/master/export/1.0.1/images/schema.png Schematic}
+      #
+      # @note Ratio for 4k7 / 10k : 3.3
+      # @note Ratio for 6k8 / 10k : 2.471
       DIVIDER_RATIO = 3.3
 
       # Initilize I2C communications
@@ -78,7 +90,7 @@ module Raspeomix
       #   :"60sps", :"15sps", :"3_75sps" which maps respectively to the
       #   resolution sympbols mentionned above.
       # One of :an0, :an1, :an2 or :an3
-      def get_channel(channel=:an0, resolution=:'18bits', pga=:'1x')
+      def sample(channel=:an0, resolution=:'18bits', pga=:'1x')
         bytes    = [ 0, 0, 0, 0 ]
 
         # Check arguments
