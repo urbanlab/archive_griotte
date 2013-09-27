@@ -23,9 +23,13 @@ module Raspeomix
         $log.debug("initializing...")
         start_client('localhost', 9292)
         @server_add = "http://localhost:9292/faye"
-        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
         register
+      end
+
+      def play_scenario
+        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
         @playing = true
+        play_step
       end
 
       def isplaying?
@@ -67,7 +71,7 @@ module Raspeomix
 
       def stop_scenario
         $log.debug("ending scenario")
-        publish("/#{@scenario_handler.playing_media[:type]}/in", { :type => :command, :action => :stop }.to_json)
+        publish("/#{@scenario_handler.current_step["mediatype"]}/in", { :type => :command, :action => :stop }.to_json)
         @playing = false
       end
 
@@ -79,14 +83,25 @@ module Raspeomix
       def handle_client_message(client, message)
         if isplaying?
           $log.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
+          #parse json message
           parsed_msg = parse(message)
+          
+          #start client if ready
           case parsed_msg[:state]
           when "ready" then
-            start(client, @scenario_handler.playing_media[:time]) if @scenario_handler.is_client_active?(client)
-          when "stopped" then
-            @scenario_handler.load_next_media
-            load(@scenario_handler.playing_media[:file], @scenario_handler.playing_media[:type])
+            start(client, @scenario_handler.current_step[:time]) if @scenario_handler.is_client_active?(client)
+          #load next media or wait for next event if conditions are fullfilled
+          when "..." then
+            #...
+          else
+          @scenario_handler.next_step_conditions.each { |condition|
+            if client.to_s == condition[:expected_client].to_s and parsed_msg[:state].to_s == condition[:expected_state].to_s
+              @scenario_handler.go_to_next_step
+              play_step
+            end
+          }
           end
+
         else
           $log.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
         end
@@ -120,8 +135,15 @@ module Raspeomix
         EM.stop_event_loop
       end
 
-      def play_scenario
-        load(@scenario_handler.playing_media[:file], @scenario_handler.playing_media[:type])
+      def play_step
+        case @scenario_handler.current_step[:step]
+        when "read_media"
+          load(@scenario_handler.current_step[:file], @scenario_handler.current_step[:mediatype])
+        when "pause_reading"
+          load("black", "image")
+        when "wait_for_event"
+          #TODO
+        end
       end
 
     end

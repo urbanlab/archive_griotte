@@ -1,0 +1,25 @@
+{
+  "type": "raspeomix",
+  "version": "1.0.0",
+  "id": "scenario1",
+  "priority": 1,
+  "behavior": {
+    "loop": true,
+    "onplay": "play",
+    "onpause": "pause"
+  },
+  "steps": [{
+    "step": "read_media",
+    "file": "/media/external/videofinale.mp4",
+    "mediatype": "video",
+    "time" : 0,
+    "loop" : 2 },
+  {
+    "step": "read_media",
+    "file": "/media/external/P1040851.JPG",
+    "mediatype": "image",
+    "time": 10,
+    "loop" : 0
+  }]
+}
+

@@ -1,8 +1,4 @@
 #!/usr/bin/env ruby
-#
-#video client for Raspéomix
-#handles communication between scheduler
-#and OMXPlayer ruby wrapper
 
 require "i2c"
 require "i2c/i2c"
