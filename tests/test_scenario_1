@@ -1,0 +1,37 @@
+{
+  "type" : "raspeomix",
+  "version" : "1.0.0",
+  "id" : "scenario1",
+  "priority" : 3,
+  "behavior" :
+  { "loop" : true,
+    "onplay" : "play",
+    "onpause" : "pause"},
+  "steps" :
+  { "step" = "read_media",
+    "file" : "/media/external/videofinale.mp4", 
+    "mediatype" : "video",
+    "loop" : 3 }, // defaults to 1
+  { "step" : "pause_reading", 
+    "time" : 10 }, // pauses for 10 secs with black screen
+  { "step" : "read_media",
+    "file" : "/media/external/P1040851.JPG", 
+    "mediatype" : "image", 
+    "time" : 10, // display time in secs
+    "effects" : [ "fadein", "fadeout" ] },
+  { "step" : "wait_for_event",
+    "type" : "sensor",
+    "path" : "input/1",
+    "value" : "up",
+    "edge" : "rising" }, // could be rising, falling, or none
+  { "step" : "read_media",
+    "file" : "/media/external/kitten.png", 
+    "mediatype" : "image", 
+    "time" : 0 },// displays forever (i.e. until sensor below is triggered)
+  { "step" : "wait_for_event",
+    "type" : "sensor",
+    "path" : "analog/0",
+    "profile" : "maxbotix_ez1", // sensor profile
+    "edge" : "none",
+    "value" : "x,100,>" } // RPN encoded test that should return true for the test to pass
+}
