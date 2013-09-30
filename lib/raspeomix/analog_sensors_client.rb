@@ -7,6 +7,7 @@
 require "i2c"
 require "i2c/i2c"
 require 'raspeomix/raspeomix'
+require 'eventmachine'
 
 module Raspeomix
 
@@ -21,13 +22,24 @@ module Raspeomix
       # formula that converts analog reading to real-world value
       #
       class SensorProfile
+        # Loads a sensor profile JSON file
+        #
+        # @params [String] file Profile file to load
         def SensorProfile.load(file)
           # TODO: read file
           # return SensorProfile.new(...)
         end
 
+        # Initializes a SensorProfile
+        #
+        # @params [String] name Profile name
+        # @params [Hash] options Options hash containing keys :convertion_formula, :metric and :description
         def initialize(name, options = {})
-          _
+          @name = name
+          options = { :convertion_formula => "x", :metric => "V", :description => 'none' }.merge(options)
+          @convertion_formula = options[:convertion_formula]
+          @metric = options[:metric]
+          @description = options[:description]
         end
       end
 
@@ -111,7 +123,8 @@ module Raspeomix
         #   :"60sps", :"15sps", :"3_75sps" which maps respectively to the
         #   resolution sympbols mentionned above.
         # One of :an0, :an1, :an2 or :an3
-        def sample(channel: :an0, resolution: :'18bits', pga: :'1x')
+        #def sample(channel: :an0, resolution: :'18bits', pga: :'1x')
+        def sample(channel=:an0, resolution=:'18bits', pga=:'1x')
           bytes    = [ 0, 0, 0, 0 ]
 
           # Check arguments
@@ -166,20 +179,27 @@ module Raspeomix
       # Class sensor holds paramters and current value for a given analog sensor
       #
       class Sensor
-        attr_reader :channel
+        attr_reader :channel, :profile
 
-        def initialize(chip, channel)
-          @chip = chip
+        def initialize(channel, profile, rate)
           @channel = channel
-          @running = true
+          @rate = rate
+          @running = false
           @observers = []
         end
 
+        # Sets ADC converter chip reference
+        #
+        # @params [Object] adc Reference to ADC
+        def chip=(adc)
+          @chip = adc
+        end
         # Returns last read sensor value
         #
         # @return [Int] the sensor value in µV
         def value
-          @chip.sample(channel: @channel)
+          # @chip.sample(channel: @channel)
+          @chip.sample(channel=@channel)
         end
 
         # Returns the current sensor reading rate
@@ -192,8 +212,8 @@ module Raspeomix
         # Starts sensor sampling
         def start
           @running = true
-          if rate != 0
-            @timer = EventMachine::PeriodicTime.new(1/rate) {
+          if @rate != 0
+            @timer = EventMachine::PeriodicTimer.new(1/rate) {
               notify_observers
             }
           end
@@ -216,8 +236,10 @@ module Raspeomix
         def rate=(rate)
           @rate = rate
           # Restart sampling
-          stop
-          start
+          if @running
+            stop
+            start
+          end
         end
 
         # Adds observer
@@ -257,19 +279,15 @@ module Raspeomix
       #
       # The rates given will be used for AN0 to AN3. If no readings are necessary, rate should be set to 0
       #
-      # @param [Array] rates The rates to use for the 4 sensors
-      def initialize(*rates)
-        if rates.length != 4
-          raise ArgumentError,
-            "4 rates are required when initializing AnalogSensorsClient"
-        end
-
-        @sensors = Array.new(4) { Sensor.new(@adc) }
+      # @param [List] snesors A list of Sensors instances
+      def initialize(*sensors)
         @adc = MCP342x.new
+        @sensors = []
 
-        @sensors.each do |s|
-          s.rate = rates[n]
+        sensors.each do |s|
           s.add_observer(self)
+          s.chip = @adc
+          @sensors << s
         end
       end
 
@@ -300,11 +318,12 @@ module Raspeomix
         Raspeomix.logger.debug "new value on sensor : #{sensor.value}"
         message = { :type => :analog_value,
                     :analog_value => {
-                      :profile => '',
-                      :raw_value => '',
-                      :converted_value => '' }
+                      :profile => sensor.profile.name,
+                      :unit => sensor.profile.unit,
+                      :raw_value => sensor.value,
+                      :converted_value => RPNCalculator.evaluate(sensor.profile.convertion_formula.gsub('x', sensor.value)) }
         }
-        publish("/sensors/analog/#{sensor.channel}", message)
+        publish("/sensors/analog/#{sensor.channel}", message.to_json)
       end
     end
 
