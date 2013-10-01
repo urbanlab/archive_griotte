@@ -16,7 +16,7 @@ module Raspeomix
       include FayeClient
 
       def initialize(type)
-        $log.debug("starting event handler...")
+        Raspeomix.logger.debug("starting event handler...")
         @properties = { :sensor_type => type }
         start_client('localhost', 9292)
         start_sensor
@@ -64,7 +64,7 @@ module Raspeomix
       end
 
       def handle_input(char)
-        $log.info ("received #{char}")
+        Raspeomix.logger.info ("received #{char}")
         if @properties[:layout] == :azerty
           case char
           when "a"

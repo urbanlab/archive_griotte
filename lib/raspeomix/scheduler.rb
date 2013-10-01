@@ -8,9 +8,6 @@ require 'eventmachine'
 require 'faye'
 require 'logger'
 
-$log = Logger.new(STDOUT)
-$log.level = Logger::DEBUG
-
 module Raspeomix
 
   module Client
@@ -20,7 +17,7 @@ module Raspeomix
       include FayeClient
 
       def initialize
-        $log.debug("initializing...")
+        Raspeomix.logger.debug("initializing...")
         start_client('localhost', 9292)
         @server_add = "http://localhost:9292/faye"
         register
@@ -37,55 +34,54 @@ module Raspeomix
       end
 
       def register
-        $log.debug("registering...")
+        Raspeomix.logger.debug("registering...")
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
-        subscribe("/keyboard/out") { |message| handle_input_message(message) }
-        $log.debug("registered")
+        subscribe("/sensor/analog/an0") { |message| handle_client_message(:sensor, message) }
+        Raspeomix.logger.debug("registered")
       end
 
       def load(file, client)
-        $log.debug("loading #{file} on #{client}")
+        Raspeomix.logger.debug("loading #{file} on #{client}")
         publish("/#{client}/in", { :type => :command, :action => :load, :arg => file }.to_json)
       end
 
       def start(client, time)
-        $log.debug("starting #{client}")
+        Raspeomix.logger.debug("starting #{client}")
         publish("/#{client}/in", { :type => :command, :action => :start, :arg => time }.to_json)
       end
 
       def play(client)
-        $log.debug("sending play to #{client}")
+        Raspeomix.logger.debug("sending play to #{client}")
         publish("/#{client}/in", { :type => :command, :action => :play }.to_json)
       end
 
       def pause(client)
-        $log.debug("sending pause to #{client}")
+        Raspeomix.logger.debug("sending pause to #{client}")
         publish("/#{client}/in", { :type => :command, :action => :pause }.to_json)
       end
 
       def stop(client)
-        $log.debug("stopping #{client}")
+        Raspeomix.logger.debug("stopping #{client}")
         publish("/#{client}/in", { :type => :command, :action => :stop }.to_json)
       end
 
       def stop_scenario
-        $log.debug("ending scenario")
+        Raspeomix.logger.debug("ending scenario")
         publish("/#{@scenario_handler.current_step["mediatype"]}/in", { :type => :command, :action => :stop }.to_json)
         @playing = false
       end
 
       def set_level(level, client)
-        $log.debug("setting #{client} level to #{level}")
+        Raspeomix.logger.debug("setting #{client} level to #{level}")
         publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => "#{level}" }.to_json)
       end
 
       def handle_client_message(client, message)
         if isplaying?
-          $log.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
+          Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
           #parse json message
           parsed_msg = parse(message)
-          
           #start client if ready
           case parsed_msg[:state]
           when "ready" then
@@ -102,7 +98,7 @@ module Raspeomix
           }
           end
         else
-          $log.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
+          Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
         end
       end
 
@@ -110,14 +106,14 @@ module Raspeomix
         case client
         when "image", "sound", "video"
           return client_state == condition
-        when "sensor" #pas exactement ça
+        when "sensor"
           return (client_state.to_i > condition[0] and condition[1] > client_state.to_i)
         end
       end
 
       def handle_input_message(message)
         parsed_msg = parse(message)
-        $log.debug (" ------------------ sensor sent message : #{parsed_msg}")
+        Raspeomix.logger.debug (" ------------------ sensor sent message : #{parsed_msg}")
         if parsed_msg[:type]=="event"
           case parsed_msg[:event]
           when "pause"
