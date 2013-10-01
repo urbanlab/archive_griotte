@@ -18,6 +18,7 @@ module Raspeomix
       # formula that converts analog reading to real-world value
       #
       class SensorProfile
+        attr_reader :name, :conversion_formula, :unit, :description
         # Loads a sensor profile JSON file
         #
         # @params [String] file Profile file to load
@@ -29,12 +30,12 @@ module Raspeomix
         # Initializes a SensorProfile
         #
         # @params [String] name Profile name
-        # @params [Hash] options Options hash containing keys :convertion_formula, :metric and :description
+        # @params [Hash] options Options hash containing keys :conversion_formula, :unit and :description
         def initialize(name, options = {})
           @name = name
-          options = { :convertion_formula => "x", :metric => "V", :description => 'none' }.merge(options)
-          @convertion_formula = options[:convertion_formula]
-          @metric = options[:metric]
+          options = { :conversion_formula => "x", :unit => "V", :description => 'none' }.merge(options)
+          @conversion_formula = options[:conversion_formula]
+          @unit = options[:unit]
           @description = options[:description]
         end
       end
@@ -140,26 +141,47 @@ module Raspeomix
           Raspeomix.logger.debug "resolution/rate set to #{resolution}, pga to #{pga}"
           @i2c.write(@device, C_READY | CHANNEL[channel] | C_OC_MODE | RESOLUTION[resolution] | PGA[pga])
 
-          # Read 4 bytes
-          # The first byte should be all zeroes
-          # The first bit of 4th byte (& 0x80) should be 0, indicating the measure is ready (Cf datasheet page 19)
-          bytes = @i2c.read(@device, 4).unpack("C4")
-          while (bytes[3] & C_READY != 0) do
-            # Repeat reading until measurement is ready
-            bytes = @i2c.read(@device, 4).unpack("C4")
+          if resolution == :'18bits' or resolution == :'3_75sps'
+            # Read 4 bytes
+            # The first byte should be all zeroes
+            # The first bit of 4th byte (& 0x80) should be 0, indicating the
+            # measure is ready (Cf datasheet page 19)
+            bytes_to_read = 4
+          else
+            bytes_to_read = 3
           end
 
-          # config = bytes[3]
-          # Get last bit of first byte, second byte, third byte
-          output_code = ((bytes[0] & 0b00000001) << 16) | (bytes[1] << 8) | bytes[2]
+          bytes = @i2c.read(@device, bytes_to_read).unpack("C#{bytes_to_read}")
+          while (bytes[bytes_to_read-1] & C_READY != 0) do
+            # Repeat reading until measurement is ready
+            bytes = @i2c.read(@device, bytes_to_read).unpack("C#{bytes_to_read}")
+          end
+
+          case resolution
+          when :'18bits', :'3_75sps'
+            # Get last bit of first byte, second byte, third byte
+            output_code = ((bytes[0] & 0b00000001) << 16) | (bytes[1] << 8) | bytes[2]
+            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b %8.b" % bytes
+          when :'16bits', :'15sps'
+            output_code = ((bytes[0] & 0b01111111) << 8) | bytes[1]
+            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
+          when :'14bits', :'60sps'
+            output_code = ((bytes[0] & 0b00011111) << 8) | bytes[1]
+            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
+          when :'12bits', :'240sps'
+            output_code = ((bytes[0] & 0b00000111) << 8) | bytes[1]
+            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
+          end
+
           # puts "output code is %b %b %b %b (%x %x %x %x)" % (bytes + bytes)
-          Raspeomix.logger.debug "bytes read %8.b %8.b %8.b %8.b" % bytes
           # puts "pga is %s (%s) %s" % [ pga, PGA[pga], 2**PGA[pga] ]
 
           #        puts "output code is %b %b %b %b" % bytes
           # Check MSB (datasheet equation 4-4 p16)
           Raspeomix.logger.debug "output_code %.8b / %d" % [ output_code, output_code ]
 
+          # Sign is always first bit of first byte, whatever the resolution
+          # (Cf datasheet p22, table 5-3)
           if (bytes[0] & 0b10000000 != 0)
             output_code = ~(0x020000 - output_code)
           end
@@ -175,11 +197,13 @@ module Raspeomix
       # Class sensor holds paramters and current value for a given analog sensor
       #
       class Sensor
-        attr_reader :channel, :profile
+        attr_reader :channel, :profile, :value
 
-        def initialize(channel, profile, rate)
+        def initialize(channel, profile, rate, precision=:'12bits')
           @channel = channel
+          @profile = profile
           @rate = rate
+          @precision = precision
           @running = false
           @observers = []
         end
@@ -193,10 +217,10 @@ module Raspeomix
         # Returns last read sensor value
         #
         # @return [Int] the sensor value in µV
-        def value
+        # def value
           # @chip.sample(channel: @channel)
-          @chip.sample(channel=@channel)
-        end
+        #  @chip.sample(channel=@channel)
+        #end
 
         # Returns the current sensor reading rate
         #
@@ -209,7 +233,9 @@ module Raspeomix
         def start
           @running = true
           if @rate != 0
+            Raspeomix.logger.debug "setting timer to trigger every %.2f seconds" % (1.0/rate)
             @timer = EventMachine::PeriodicTimer.new(1/rate) {
+              @value = @chip.sample(channel=@channel, resolution=@precision)
               notify_observers
             }
           end
@@ -311,14 +337,17 @@ module Raspeomix
       # Emits faye message when value is received
       #
       def update(sensor)
-        Raspeomix.logger.debug "new value on sensor : #{sensor.value}"
+        value = sensor.value
+        Raspeomix.logger.debug "new value on sensor : #{value}"
+        val = RPNCalculator.evaluate(sensor.profile.conversion_formula.gsub('x', value.to_s)) 
         message = { :type => :analog_value,
                     :analog_value => {
                       :profile => sensor.profile.name,
                       :unit => sensor.profile.unit,
-                      :raw_value => sensor.value,
-                      :converted_value => RPNCalculator.evaluate(sensor.profile.convertion_formula.gsub('x', sensor.value)) }
-        }
+                      :raw_value => value,
+                      :converted_value => val
+                    }
+                  }
         publish("/sensors/analog/#{sensor.channel}", message.to_json)
       end
     end
