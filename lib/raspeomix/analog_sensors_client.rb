@@ -234,7 +234,7 @@ module Raspeomix
           @running = true
           if @rate != 0
             Raspeomix.logger.debug "setting timer to trigger every %.2f seconds" % (1.0/rate)
-            @timer = EventMachine::PeriodicTimer.new(1/rate) {
+            @timer = EventMachine::PeriodicTimer.new(1.0/rate) {
               @value = @chip.sample(channel=@channel, resolution=@precision)
               notify_observers
             }
