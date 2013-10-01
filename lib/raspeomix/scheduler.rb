@@ -95,15 +95,23 @@ module Raspeomix
             #...
           else
           @scenario_handler.next_step_conditions.each { |condition|
-            if client.to_s == condition[:expected_client].to_s and parsed_msg[:state].to_s == condition[:expected_state].to_s
+            if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, parsed_msg[:state].to_s, condition[:condition].to_s)
               @scenario_handler.go_to_next_step
               play_step
             end
           }
           end
-
         else
           $log.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
+        end
+      end
+
+      def check_condition(client, client_state, condition)
+        case client
+        when "image", "sound", "video"
+          return client_state == condition
+        when "sensor" #pas exactement ça
+          return (client_state.to_i > condition[0] and condition[1] > client_state.to_i)
         end
       end
 

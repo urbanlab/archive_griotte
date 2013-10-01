@@ -1,0 +1,25 @@
+{
+  "type": "raspeomix",
+  "version": "1.0.0",
+  "id": "Storys",
+  "priority": 1,
+  "behavior": {
+    "loop": true
+  },
+  "steps": [/*{
+    "step": "wait_for_event",
+    "type" : "sensor",
+    "path" : "input/1",
+    "value" : "up",
+    "edge" : "rising",
+    "threshold" : 123456
+  },*/
+  {
+    "step": "read_media",
+    "file": "/media/external/videofinale.mp4",
+    "mediatype": "video",
+    "time": 0,
+    "loop" : 0
+  }]
+}
+

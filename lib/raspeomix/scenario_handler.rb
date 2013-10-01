@@ -19,7 +19,7 @@ module Raspeomix
       @media_path = "/media/external"
       @scenarios = []
       @index = 0
-      @loopindex = 1
+      @loopindex = 0
       #mount key
       if Dir.entries(@media_path).size == 2 then
         %x{sudo mount #{@key_path} #{@media_path}}
@@ -62,7 +62,7 @@ module Raspeomix
         @loopindex += 1
       else
         @index = (@index+1)%(@playing_scenario[:steps].size)
-        @loopindex = 1
+        @loopindex = 0
       end
       @current_step = @playing_scenario[:steps][@index]
     end
@@ -73,14 +73,25 @@ module Raspeomix
       conditions = []
       case @current_step[:step]
       when "read_media"
-        conditions << {:expected_client => @current_step[:mediatype], :expected_state => "stopped"}
+        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
       when "pause_reading"
-        conditions << {:expected_client => @current_step[:mediatype], :expected_state => "stopped"}
+        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
       when "wait_for_event"
-        #conditions << {:type = @playing_scenario[:steps][@index]["type"], "expected" = ""}
+        conditions << {:expected_client => "#{@current_step[:type]}/#{@current_step[:path]}", :condition => check_event}
       end
       return conditions
     end
+
+    def check_event
+      case @current_step[:value]
+      when "up"
+        return [0,@current_step[:value]]
+      when "down"
+        return [@current_step[:value], 9999999]
+      end
+    end
+
+
 
     def is_client_active?(client)
       if @current_step[:mediatype].to_s == client.to_s then

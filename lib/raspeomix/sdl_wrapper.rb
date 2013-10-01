@@ -24,17 +24,22 @@ module Raspeomix
     end
 
     def load(file)
-      @image = Surface.load(file)
+      case file
+      when "black"
+        @image = Surface.new([100,100])
+      else
+        @image = Surface.load(file)
+      end
       send_sdl_state(:ready)
       true
     end
 
     def start(time)
       @play_time = time
-      @screen = Screen.open(@resolution)
-      @screen.show_cursor = false
-      @image.blit(@screen,[0,0])
-      @screen.update
+      #@screen = Screen.open(@resolution)
+      #@screen.show_cursor = false
+      #@image.blit(@screen,[0,0])
+      #@screen.update
       play_until_end
       send_sdl_state(:playing)
       true
@@ -58,7 +63,7 @@ module Raspeomix
     end
 
     def play_until_end
-      puts "---------------- SDLWRAPPER play time : #{@play_time}"
+      Raspeomix.logger.debug( "---------------- SDLWRAPPER play time : #{@play_time}")
       if @play_time == 0
         stop
       else
@@ -73,7 +78,7 @@ module Raspeomix
     def stop
       send_sdl_state(:stopped)
       send_sdl_state(:idle)
-      Screen.close
+      #Screen.close
       true
     end
   end

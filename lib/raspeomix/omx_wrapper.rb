@@ -51,8 +51,7 @@ module Raspeomix
     end
 
     def start(time) #time not used for now
-      #EM.popen("omxplayer -s --pos 110 #{@file} < #{@fifo.path}", EM::LiveProcess, @q)
-      EM.popen("omxplayer -s --pos 110 #{@file}", EM::LiveProcess, @iq, @oq)
+      EM.popen("omxplayer -s #{@file}", EM::LiveProcess, @iq, @oq)
 #      @fifo.start
       @playing = true
  #     @iq.push('q')
