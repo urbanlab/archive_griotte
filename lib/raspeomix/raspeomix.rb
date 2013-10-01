@@ -16,7 +16,6 @@ module Raspeomix
   end
 
   def self.initialize_log
-    `export RASP_LOG=STDOUT` #temporary
     return NullObject.new unless ENV['RASP_LOG']
 
     @do_log = true
