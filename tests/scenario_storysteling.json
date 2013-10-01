@@ -6,14 +6,14 @@
   "behavior": {
     "loop": true
   },
-  "steps": [/*{
+  "steps": [{
     "step": "wait_for_event",
     "type" : "sensor",
-    "path" : "input/1",
+    "path" : "sensor/analog/an0",
     "value" : "up",
     "edge" : "rising",
-    "threshold" : 123456
-  },*/
+    "threshold" : 200
+  },
   {
     "step": "read_media",
     "file": "/media/external/videofinale.mp4",

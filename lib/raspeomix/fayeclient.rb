@@ -20,14 +20,14 @@ module Raspeomix
       def publish(channel, value)
         # The key must start with /
         channel[0] == '/' or raise ArgumentError
-        $log.debug(" ---- FAYE : publishing #{value} to #{"/#{nick}#{channel}"}")
+        Raspeomix.logger.debug(" ---- FAYE : publishing #{value} to #{"/#{nick}#{channel}"}")
         faye.publish("/#{nick}#{channel}", value)
       end
 
       def subscribe(channel)
         channel[0] == '/' or raise ArgumentError
         publish("/debug", { :msg => "Subscribing to #{nick}#{channel}" })
-        $log.debug(" ---- FAYE : subscribing to #{"/#{nick}#{channel}"}")
+        Raspeomix.logger.debug(" ---- FAYE : subscribing to #{"/#{nick}#{channel}"}")
         faye.subscribe("/#{nick}#{channel}") do |message|
           yield message if block_given?
         end

@@ -77,18 +77,13 @@ module Raspeomix
       when "pause_reading"
         conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
       when "wait_for_event"
-        conditions << {:expected_client => "#{@current_step[:type]}/#{@current_step[:path]}", :condition => check_event}
+        conditions << {:expected_client => "#{@current_step[:path]}", :condition => check_event}
       end
       return conditions
     end
 
     def check_event
-      case @current_step[:value]
-      when "up"
-        return [0,@current_step[:value]]
-      when "down"
-        return [@current_step[:value], 9999999]
-      end
+      return [@current_step[:value], @current_step[:threshold]]
     end
 
 

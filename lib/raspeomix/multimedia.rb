@@ -26,7 +26,7 @@ module Raspeomix
       end
 
       def update_wrapped_state(state)
-        $log.debug("wrapper sent state : #{state}")
+        Raspeomix.logger.debug("wrapper sent state : #{state}")
         update_state(state)
       end
 
@@ -34,7 +34,7 @@ module Raspeomix
         if @handler.load(file)
           update_state(:ready?)
         else
-          $log.error("error while loading #{file} to #{self.name} client")
+          Raspeomix.logger.error("error while loading #{file} to #{self.name} client")
           update_state(:error)
         end
       end
@@ -43,7 +43,7 @@ module Raspeomix
         if @handler.start(time)
           update_state(:playing?)
         else
-          $log.error("error while starting #{self.name} client")
+          Raspeomix.logger.error("error while starting #{self.name} client")
           update_state(:error)
         end
       end
@@ -52,7 +52,7 @@ module Raspeomix
         if @handler.pause
           update_state(:paused?)
         else
-          $log.error("error while pausing #{self.name} client")
+          Raspeomix.logger.error("error while pausing #{self.name} client")
           update_state(:error)
         end
       end
@@ -61,7 +61,7 @@ module Raspeomix
         if @handler.play
           update_state(:playing?)
         else
-          $log.error("error while unpausing #{self.name} client")
+          Raspeomix.logger.error("error while unpausing #{self.name} client")
           update_state(:error)
         end
       end
@@ -70,7 +70,7 @@ module Raspeomix
         if @handler.stop
           update_state(:idle?)
         else
-          $log.error("error while stopping #{self.name} client")
+          Raspeomix.logger.error("error while stopping #{self.name} client")
           update_state(:error)
         end
       end
@@ -79,7 +79,7 @@ module Raspeomix
         if @handler.set_level(level)
           update_level(level+"?")
         else
-          $log.error("error while setting #{self.name} client level to #{level}")
+          Raspeomix.logger.error("error while setting #{self.name} client level to #{level}")
           update_state(:error)
         end
       end
@@ -90,12 +90,12 @@ module Raspeomix
       end
 
       def register(path)
-        $log.debug("subscribing to #{path}")
+        Raspeomix.logger.debug("subscribing to #{path}")
         subscribe(path) { |message| receive_message(message) }
       end
 
       def receive_message(message)
-        $log.debug("message received : #{message}")
+        Raspeomix.logger.debug("message received : #{message}")
         parsed_msg = JSON.parse(message, :symbolize_names => true)
         if parsed_msg[:type] == "command"
           if method(parsed_msg[:action]).arity != 0
@@ -108,7 +108,7 @@ module Raspeomix
         elsif parsed_msg[:type] == "omx_state"
           update_handled_state(parsed_msg[:state])
         else
-          $log.error("message type #{parsed_msg[:type]} not recognized, message is : #{parsed_msg}")
+          Raspeomix.logger.error("message type #{parsed_msg[:type]} not recognized, message is : #{parsed_msg}")
         end
       end
 
@@ -127,7 +127,7 @@ module Raspeomix
       def update_property(property_type, property)
         @properties[property_type] = property
         publish_property(property_type, property)
-        $log.debug("#{property_type} changed to #{property}")
+        Raspeomix.logger.debug("#{property_type} changed to #{property}")
       end
 
       def publish_property(property_type, property)
