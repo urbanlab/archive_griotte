@@ -38,7 +38,7 @@ module Raspeomix
       end
 
       def faye
-        @faye ||= start
+        @faye ||= start_client
       end
     end
   end
