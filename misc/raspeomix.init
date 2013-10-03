@@ -41,7 +41,7 @@ pid_check()
 {
   PID=`ps auwx | grep [t]hin | awk '{ print $2 }'`
   if [ -z $PID ]; then
-    rm $PIDFILE
+    rm $PIDFILE 2> /dev/null
   fi
   echo $PID
 }
@@ -51,7 +51,8 @@ pid_check()
 #
 do_start()
 {
-  [ ! -z pid_check ] && return 1
+  PID=$( pid_check )
+  [ -z "$PID" ] || return 1
   rm $BASEDIR/log/thin.log
   su pi -c "cd $BASEDIR; bundle exec rake server:start" || return 2
 }
@@ -66,7 +67,8 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-  [ -z pid_check ] || return 1
+  PID=$( pid_check )
+  [ -z "$PID" ] && return $1
   su pi -c "cd $BASEDIR; bundle exec rake server:stop" || return 2
 }
 

@@ -24,7 +24,7 @@ module Raspeomix
       end
 
       def play_scenario
-        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
+        @scenario_handler = ScenarioHandler.new("/home/pi/raspeomix/tests")
         @playing = true
         play_step
       end
@@ -37,7 +37,7 @@ module Raspeomix
         Raspeomix.logger.debug("registering...")
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
-        subscribe("/sensor/analog/an0") { |message| handle_client_message(:sensor, message) }
+        subscribe("/sensors/analog/an0") { |message| handle_client_message("sensors/analog/an0", message) }
         Raspeomix.logger.debug("registered")
       end
 
@@ -83,31 +83,37 @@ module Raspeomix
           #parse json message
           parsed_msg = parse(message)
           #start client if ready
-          case parsed_msg[:state]
-          when "ready" then
-            start(client, @scenario_handler.current_step[:time]) if @scenario_handler.is_client_active?(client)
-          #load next media or wait for next event if conditions are fullfilled
-          when "..." then
-            #...
-          else
-          @scenario_handler.next_step_conditions.each { |condition|
-            if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, parsed_msg[:state].to_s, condition[:condition].to_s)
-              @scenario_handler.go_to_next_step
-              play_step
+          if parsed_msg[:type]=="property_update" and parsed_msg[:state]=="ready"
+            case parsed_msg[:state]
+            when "ready" then
+              start(client, @scenario_handler.current_step[:time]) if @scenario_handler.is_client_active?(client)
+              #load next media or wait for next event if conditions are fullfilled
+            when "..." then
+              #...
             end
-          }
+          else
+            @scenario_handler.next_step_conditions.each { |condition|
+              if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, parsed_msg, condition[:condition])
+                @scenario_handler.go_to_next_step
+                play_step
+              end
+            }
           end
         else
           Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
         end
       end
 
-      def check_condition(client, client_state, condition)
+      def check_condition(client, parsed_msg, condition)
         case client
         when "image", "sound", "video"
-          return client_state == condition
-        when "sensor"
-          return (client_state.to_i > condition[0] and condition[1] > client_state.to_i)
+          return parsed_msg[:state] == condition
+        else #TODO : mettre la vraie condition
+          if condition[0] = "up"
+            return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
+          else
+            return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
+          end
         end
       end
 

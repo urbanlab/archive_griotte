@@ -20,10 +20,6 @@ module Raspeomix
       @scenarios = []
       @index = 0
       @loopindex = 0
-      #mount key
-      if Dir.entries(@media_path).size == 2 then
-        %x{sudo mount #{@key_path} #{@media_path}}
-      end
       #list all available scenarios in @scenarios
       @scenarios = retrieve_scenarios(scenario_path)
       @playing_scenario = choose_default(@scenarios)
