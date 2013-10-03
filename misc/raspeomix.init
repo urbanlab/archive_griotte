@@ -40,9 +40,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 pid_check()
 {
   PID=`ps auwx | grep [t]hin | awk '{ print $2 }'`
-  if [ -z $PID ]; then
-    rm $PIDFILE 2> /dev/null
-  fi
+  [ -z "$PID" ] && rm $PIDFILE 2> /dev/null
   echo $PID
 }
 
@@ -52,7 +50,7 @@ pid_check()
 do_start()
 {
   PID=$( pid_check )
-  [ -z "$PID" ] || return 1
+  [ ! -z "$PID" ] && return 1
   rm $BASEDIR/log/thin.log
   su pi -c "cd $BASEDIR; bundle exec rake server:start" || return 2
 }
@@ -78,12 +76,13 @@ do_stop()
 
 case "$1" in
   status)
-     if [ ! -z pid_check ]; then
-       log_success_msg "$name is running"
-     else
-       log_failure_msg "$name is not running"
-     fi
-     ;;
+    PID=$( pid_check )
+    if [ ! -z "$PID" ]; then
+      log_success_msg "$name is running"
+    else
+      log_failure_msg "$name is not running"
+    fi
+    ;;
   start)
 	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
 	do_start
