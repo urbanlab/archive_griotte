@@ -33,11 +33,26 @@ SCRIPTNAME=/etc/init.d/$NAME
 . /lib/lsb/init-functions
 
 #
+# Checks PID
+#
+# We don't really trust PID file since it might be leftover
+# from hard power off
+pid_check()
+{
+  PID=`ps auwx | grep [t]hin | awk '{ print $2 }'`
+  if [ -z $PID ]; then
+    rm $PIDFILE
+  fi
+  echo $PID
+}
+
+#
 # Function that starts the daemon/service
 #
 do_start()
 {
-  [ -f $PIDFILE ] && return 1
+  [ ! -z pid_check ] && return 1
+  rm $BASEDIR/log/thin.log
   su pi -c "cd $BASEDIR; bundle exec rake server:start" || return 2
 }
 
@@ -51,7 +66,7 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-  [ -f $PIDFILE ] || return 1
+  [ -z pid_check ] || return 1
   su pi -c "cd $BASEDIR; bundle exec rake server:stop" || return 2
 }
 
@@ -61,7 +76,7 @@ do_stop()
 
 case "$1" in
   status)
-     if echo -n `pidof "thin server (0.0.0.0:3000)"` | diff - /home/pi/raspeomix/tmp/pids/thin.pid > /dev/null 2>&1; then
+     if [ ! -z pid_check ]; then
        log_success_msg "$name is running"
      else
        log_failure_msg "$name is not running"
