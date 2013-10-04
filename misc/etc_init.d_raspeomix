@@ -1,8 +1,8 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          raspeomix
-# Required-Start:    $ssh $syslog
-# Required-Stop:     $ssh $syslog
+# Required-Start:    $sshd $syslog
+# Required-Stop:     $sshd $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Raspeomix Museum Player
@@ -32,6 +32,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
+VERBOSE="yes"
 #
 # Checks PID
 #
@@ -51,8 +52,13 @@ do_start()
 {
   PID=$( pid_check )
   [ ! -z "$PID" ] && return 1
-  rm $BASEDIR/log/thin.log
-  su pi -c "cd $BASEDIR; bundle exec rake server:start" || return 2
+  rm $BASEDIR/log/*.log 2> /dev/null
+  su pi -c "cd $BASEDIR; RASP_PORT=$RASP_PORT bundle exec rake server:start" || return 2
+#  for i in $RASP_CLIENTS; do
+#    echo -n "...$i"
+#    #su pi -c "cd $BASEDIR && RASP_PORT=$RASP_PORT bundle exec rake client:start[$i]"
+#    cd $BASEDIR && RASP_PORT=$RASP_PORT bundle exec rake client:start[$i]
+#  done
 }
 
 #
@@ -68,6 +74,8 @@ do_stop()
   PID=$( pid_check )
   [ -z "$PID" ] && return $1
   su pi -c "cd $BASEDIR; bundle exec rake server:stop" || return 2
+  echo -n "...clients"
+  pkill -TERM -f 'ruby -I./lib clients/'
 }
 
 #
@@ -78,7 +86,8 @@ case "$1" in
   status)
     PID=$( pid_check )
     if [ ! -z "$PID" ]; then
-      log_success_msg "$name is running"
+      CLIENTS=`pgrep -f "ruby -I./lib clients/" | tr '\n' ' '`
+      log_success_msg "$name is running on port $RASP_PORT and PIDs $PID [ $CLIENTS] "
     else
       log_failure_msg "$name is not running"
     fi
