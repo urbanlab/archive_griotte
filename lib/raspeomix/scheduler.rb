@@ -38,6 +38,7 @@ module Raspeomix
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
         subscribe("/sensors/analog/an0") { |message| handle_client_message("sensors/analog/an0", message) }
+        subscribe("/webclient/out"){ |message| handle_webclient_message(message) }
         Raspeomix.logger.debug("registered")
       end
 
@@ -102,6 +103,18 @@ module Raspeomix
         else
           Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
         end
+      end
+      
+      def handle_webclient_message(message)
+      	parsed_msg = parse(message)
+      	if parsed_msg[:type]=="event"
+      		case parsed_msg[:event]
+      		when "pause"
+      			pause(@scenario_handler.current_step[:mediatype])
+      		when "play"
+      			play(@scenario_handler.current_step[:mediatype])
+      		end
+      	end
       end
 
       def check_condition(client, parsed_msg, condition)
