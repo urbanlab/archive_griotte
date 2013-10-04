@@ -93,6 +93,7 @@ module Raspeomix
             end
           else
             @scenario_handler.next_step_conditions.each { |condition|
+
               if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, parsed_msg, condition[:condition])
                 @scenario_handler.go_to_next_step
                 play_step
@@ -109,7 +110,7 @@ module Raspeomix
         when "image", "sound", "video"
           return parsed_msg[:state] == condition
         else #TODO : mettre la vraie condition
-          if condition[0] = "up"
+          if condition[0] = "down"
             return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
           else
             return parsed_msg[:analog_value][:converted_value].to_i<condition[1]

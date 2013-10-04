@@ -339,6 +339,7 @@ module Raspeomix
       def update(sensor)
         value = sensor.value
         Raspeomix.logger.debug "new value on sensor : #{value}"
+        Raspeomix.logger.debug "applying formula #{sensor.profile.conversion_formula}"
         val = RPNCalculator.evaluate(sensor.profile.conversion_formula.gsub('x', value.to_s)) 
         message = { :type => :analog_value,
                     :analog_value => {
@@ -348,6 +349,7 @@ module Raspeomix
                       :converted_value => val
                     }
                   }
+        Raspeomix.logger.debug "message dump #{message.inspect}"
         publish("/sensors/analog/#{sensor.channel}", message.to_json)
       end
     end
