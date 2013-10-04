@@ -105,12 +105,16 @@ module Raspeomix
       end
 
       def check_condition(client, parsed_msg, condition)
+		Raspeomix.logger.debug ("check condition arguments are :")
+		Raspeomix.logger.debug ("client : #{client}")
+		Raspeomix.logger.debug ("parsed_msg : #{parsed_msg}")
+		Raspeomix.logger.debug ("condition : #{condition}")
         case client
         when "image", "sound", "video"
           return parsed_msg[:state] == condition
         else #TODO : mettre la vraie condition
           if condition[0] = "up"
-            return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
+            return !(parsed_msg[:analog_value][:converted_value].to_i>condition[1])
           else
             return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
           end
