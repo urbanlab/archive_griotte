@@ -20,9 +20,21 @@ EM.run {
             }
 
   EM.add_periodic_timer(1){
-    @client.publish("/#{@hostname}/sensor/analog/an0", message.to_json)
+    @client.publish("/#{@hostname}/sensors/analog/an0", message.to_json)
   }
   EM.add_periodic_timer(10){
-    @client.publish("/#{@hostname}/sensor/analog/an0", message2.to_json)
+    @client.publish("/#{@hostname}/sensors/analog/an0", message2.to_json)
+  }
+  EM.add_timer(10){
+    @client.publish("/#{@hostname}/webclient/out", {:type=>:event, :event=>"level", :arg=>0}.to_json)
+  }
+  EM.add_timer(15){
+    @client.publish("/#{@hostname}/webclient/out", {:type=>:event, :event=>"level", :arg=>20}.to_json)
+  }
+  EM.add_timer(20){
+    @client.publish("/#{@hostname}/webclient/out", {:type=>:event, :event=>"pause"}.to_json)
+  }
+  EM.add_timer(25){
+    @client.publish("/#{@hostname}/webclient/out", {:type=>:event, :event=>"play"}.to_json)
   }
 }

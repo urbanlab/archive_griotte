@@ -21,7 +21,7 @@ module Raspeomix
       @index = 0
       @loopindex = 0
       #list all available scenarios in @scenarios
-      @scenarios = retrieve_scenarios(scenario_path)
+      @scenarios = retrieve_scenarios(scenario_path) #quickfix, a changer
       @playing_scenario = choose_default(@scenarios)
 
       #get first step in the .json file

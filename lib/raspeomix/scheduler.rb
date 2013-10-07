@@ -24,7 +24,7 @@ module Raspeomix
       end
 
       def play_scenario
-        @scenario_handler = ScenarioHandler.new("/home/pi/raspeomix/tests")
+        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
         @playing = true
         play_step
       end
@@ -38,6 +38,7 @@ module Raspeomix
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
         subscribe("/sensors/analog/an0") { |message| handle_client_message("sensors/analog/an0", message) }
+        subscribe("/webclient/out") {|message| handle_webclient_message(message) }
         Raspeomix.logger.debug("registered")
       end
 
@@ -74,7 +75,7 @@ module Raspeomix
 
       def set_level(level, client)
         Raspeomix.logger.debug("setting #{client} level to #{level}")
-        publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => "#{level}" }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => level }.to_json)
       end
 
       def handle_client_message(client, message)
@@ -114,6 +115,20 @@ module Raspeomix
             return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
           else
             return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
+          end
+        end
+      end
+
+      def handle_webclient_message(message)
+        parsed_msg = parse(message)
+        if parsed_msg[:type]=="event"
+          case parsed_msg[:event]
+          when "pause"
+            pause(@scenario_handler.current_step[:mediatype])
+          when "play"
+            play(@scenario_handler.current_step[:mediatype])
+          when "level"
+            set_level(parsed_msg[:arg], @scenario_handler.current_step[:mediatype])
           end
         end
       end
