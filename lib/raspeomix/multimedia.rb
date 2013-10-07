@@ -77,7 +77,7 @@ module Raspeomix
 
       def set_level(level)
         if @handler.set_level(level)
-          update_level(level+"?")
+          #update_level(level+"?") TODO
         else
           Raspeomix.logger.error("error while setting #{self.name} client level to #{level}")
           update_state(:error)
