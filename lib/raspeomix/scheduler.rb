@@ -23,8 +23,8 @@ module Raspeomix
         register
       end
 
-      def play_scenario
-        @scenario_handler = ScenarioHandler.new("/home/pi/dev/raspeomix/tests")
+      def play_scenario(scenarios_path)
+        @scenario_handler = ScenarioHandler.new(scenarios_path)
         @playing = true
         play_step
       end
@@ -38,7 +38,8 @@ module Raspeomix
         subscribe("/video/out") { |message| handle_client_message(:video, message) }
         subscribe("/image/out") { |message| handle_client_message(:image, message) }
         subscribe("/sensors/analog/an0") { |message| handle_client_message("sensors/analog/an0", message) }
-        subscribe("/webclient/out") {|message| handle_webclient_message(message) }
+        subscribe("/sound") {|message| handle_sound_command(message) }
+        subscribe("/scenario") {|message| handle_scenario_command(message) }
         Raspeomix.logger.debug("registered")
       end
 
@@ -116,6 +117,26 @@ module Raspeomix
           else
             return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
           end
+        end
+      end
+
+      def handle_sound_command(message)
+        parsed_msg=parse(message)
+        if parsed_msg[:state]=="off"
+          level = 0
+        else
+          level = parsed_msg[:level]
+        end
+        set_level(level, @scenario_handler.current_step[:mediatype])
+      end
+
+      def handle_scenario_command(message)
+        parsed_msg = parse(message)
+        case parsed_msg[:command]
+        when "pause"
+          pause(@scenario_handler.current_step[:mediatype])
+        when "play"
+          play(@scenario_handler.current_step[:mediatype])
         end
       end
 
