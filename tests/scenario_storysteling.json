@@ -12,7 +12,8 @@
     "path" : "sensor/analog/an0",
     "value" : "up",
     "edge" : "rising",
-    "threshold" : 200
+    "threshold" : 200,
+    "loop" : 0
   },
   {
     "step": "read_media",
