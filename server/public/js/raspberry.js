@@ -1,5 +1,9 @@
 
 $( document ).bind( "pageinit", function( event ) {
+  $('#toggle-scenario').bind('slidestop', function() {
+    Raspberry.scenario("pause");
+  });
+
   $('#toggle-sound').bind('slidestop', function() {
 /*    console.log($('#toggle-sound'));
     if ($('#toggle-sound').prop('value') == 'off') {
@@ -9,6 +13,7 @@ $( document ).bind( "pageinit", function( event ) {
     };*/
     Raspberry.sound($('#toggle-sound').prop('value'), $('#slider-sound').prop('value')); 
   });
+
   $('#slider-sound').bind('slidestop', function() {
     console.log($('#slider-sound'));
     Raspberry.sound($('#toggle-sound').prop('value'), $('#slider-sound').prop('value')); 
@@ -43,6 +48,7 @@ Raspberry = {
 
     this._slidersound = $('#slider-sound');
     this._togglesound = $('#toggle-sound');
+    this._togglescenario = $('#toggle-scenario');
 
     this._prefix = location.hostname.split('.')[0];
 
@@ -67,6 +73,7 @@ Raspberry = {
     //this._bayeux.subscribe('/' + this._prefix + '/heartbeats', this.accept, this);
     this._bayeux.subscribe('/heartbeats', this.accept, this);
     this._bayeux.subscribe('/' + this._prefix + '/sound', this.sound_in, this);
+    this._bayeux.subscribe('/' + this._prefix + '/scenario', this.scenario_in, this);
 
     // Detect network problems and disable the form when offline
     this._bayeux.bind('transport:down', function() {
@@ -87,8 +94,29 @@ Raspberry = {
     this._heartbeat.fadeIn(500, function() { $(this).fadeOut(500); } );
   },
 
+  scenario: function(state) {
+    this._bayeux.publish('/' + this._prefix + '/scenario', {command: state});
+  },
+
   sound: function(state, volume) {
-    this._bayeux.publish('/' + this._prefix + '/sound', {state: state, volume: volume});
+    this._bayeux.publish('/' + this._prefix + '/sound', {state: state, volume: parseInt(volume)});
+  },
+
+  scenario_in: function(data) {
+    console.log("scenario event in");
+    console.log(data);
+
+    // Toggle
+//    console.log(this._togglesound);
+//    this._togglesound.slider({ value: data['state'] });
+    if (data['state'] == 'play') {
+      state = 'on';
+    } else {
+      state = 'off'
+    }
+
+    this._togglescenario.prop({ value: state });
+    this._togglescenario.slider('refresh');
   },
 
   sound_in: function(data) {

@@ -112,7 +112,7 @@ module Raspeomix
         when "image", "sound", "video"
           return parsed_msg[:state] == condition
         else #TODO : mettre la vraie condition
-          if condition[0] = "down"
+          if condition[0] == "down"
             return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
           else
             return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
@@ -122,19 +122,19 @@ module Raspeomix
 
       def handle_sound_command(message)
           Raspeomix.logger.debug (" ------------------ command received : #{message}.")
-        parsed_msg=parse(message)
-        if parsed_msg[:state]=="off"
+        message=parse(message) #unless message.class==Hash
+        if message[:state]=="off"
           level = 0
         else
-          level = parsed_msg[:level]
+          level = message[:level]
         end
         set_level(level, @scenario_handler.current_step[:mediatype])
       end
 
       def handle_scenario_command(message)
           Raspeomix.logger.debug (" ------------------ command received: #{message}.")
-        parsed_msg = parse(message)
-        case parsed_msg[:command]
+        message=parse(message) #unless message.class==Hash
+        case message[:command]
         when "pause"
           pause(@scenario_handler.current_step[:mediatype])
         when "play"
