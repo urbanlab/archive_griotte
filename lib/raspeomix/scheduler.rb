@@ -121,6 +121,7 @@ module Raspeomix
       end
 
       def handle_sound_command(message)
+          Raspeomix.logger.debug (" ------------------ command received : #{message}.")
         parsed_msg=parse(message)
         if parsed_msg[:state]=="off"
           level = 0
@@ -131,6 +132,7 @@ module Raspeomix
       end
 
       def handle_scenario_command(message)
+          Raspeomix.logger.debug (" ------------------ command received: #{message}.")
         parsed_msg = parse(message)
         case parsed_msg[:command]
         when "pause"

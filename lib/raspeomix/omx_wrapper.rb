@@ -91,7 +91,6 @@ module Raspeomix
       lvl = Math.log10(lvl.to_f/100)*10 #percent to db
       real_lvl = (lvl/3).round*3 #OMXPlayer changes level per 3db (7db -> 6db or -20db -> -21db)
       while @level != real_lvl
-        puts "level is #{@level}"
         if @level > real_lvl
           @iq.push(LVLDWN)
           sleep 0.05 #quickfix to avoid fifo spamming
