@@ -342,7 +342,7 @@ module Raspeomix
                       :converted_value => val
                     }
                   }
-        publish("/sensors/analog/#{sensor.channel}", message.to_json)
+        publish("/sensors/analog/#{sensor.channel}", message)
       end
     end
 

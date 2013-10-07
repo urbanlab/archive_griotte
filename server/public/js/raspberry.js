@@ -1,7 +1,7 @@
 
 $( document ).bind( "pageinit", function( event ) {
   $('#toggle-scenario').bind('slidestop', function() {
-    Raspberry.scenario("pause");
+    Raspberry.scenario($('#toggle-scenario').prop('value'));
   });
 
   $('#toggle-sound').bind('slidestop', function() {
@@ -99,7 +99,7 @@ Raspberry = {
   },
 
   sound: function(state, volume) {
-    this._bayeux.publish('/' + this._prefix + '/sound', {state: state, volume: parseInt(volume)});
+    this._bayeux.publish('/' + this._prefix + '/sound', {state: state, level: parseInt(volume)});
   },
 
   scenario_in: function(data) {
@@ -109,12 +109,12 @@ Raspberry = {
     // Toggle
 //    console.log(this._togglesound);
 //    this._togglesound.slider({ value: data['state'] });
-    if (data['state'] == 'play') {
+/*    if (data['state'] == 'play') {
       state = 'on';
     } else {
       state = 'off'
     }
-
+*/
     this._togglescenario.prop({ value: state });
     this._togglescenario.slider('refresh');
   },
@@ -136,7 +136,7 @@ Raspberry = {
     }
 
     // Slider
-    this._slidersound.prop({ value: data['volume'] });
+    this._slidersound.prop({ value: data['level'] });
     this._slidersound.slider('refresh');
   }
 };

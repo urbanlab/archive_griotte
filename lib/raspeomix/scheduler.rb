@@ -45,48 +45,47 @@ module Raspeomix
 
       def load(file, client)
         Raspeomix.logger.debug("loading #{file} on #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :load, :arg => file }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :load, :arg => file })
       end
 
       def start(client, time)
         Raspeomix.logger.debug("starting #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :start, :arg => time }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :start, :arg => time })
       end
 
       def play(client)
         Raspeomix.logger.debug("sending play to #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :play }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :play })
       end
 
       def pause(client)
         Raspeomix.logger.debug("sending pause to #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :pause }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :pause })
       end
 
       def stop(client)
         Raspeomix.logger.debug("stopping #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :stop }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :stop })
       end
 
       def stop_scenario
         Raspeomix.logger.debug("ending scenario")
-        publish("/#{@scenario_handler.current_step["mediatype"]}/in", { :type => :command, :action => :stop }.to_json)
+        publish("/#{@scenario_handler.current_step[:mediatype]}/in", { :type => :command, :action => :stop })
         @playing = false
       end
 
       def set_level(level, client)
         Raspeomix.logger.debug("setting #{client} level to #{level}")
-        publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => level }.to_json)
+        publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => level })
       end
 
       def handle_client_message(client, message)
         if isplaying?
           Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
           #parse json message
-          parsed_msg = parse(message)
           #start client if ready
-          if parsed_msg[:type]=="property_update" and parsed_msg[:state]=="ready"
-            case parsed_msg[:state]
+          if message["type"]=="property_update" and message["state"]=="ready"
+            case message["state"]
             when "ready" then
               start(client, @scenario_handler.current_step[:time]) if @scenario_handler.is_client_active?(client)
               #load next media or wait for next event if conditions are fullfilled
@@ -95,8 +94,7 @@ module Raspeomix
             end
           else
             @scenario_handler.next_step_conditions.each { |condition|
-
-              if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, parsed_msg, condition[:condition])
+              if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, message, condition[:condition])
                 @scenario_handler.go_to_next_step
                 play_step
               end
@@ -107,34 +105,32 @@ module Raspeomix
         end
       end
 
-      def check_condition(client, parsed_msg, condition)
+      def check_condition(client, message, condition)
         case client
         when "image", "sound", "video"
-          return parsed_msg[:state] == condition
+          return message["state"] == condition
         else #TODO : mettre la vraie condition
           if condition[0] == "down"
-            return parsed_msg[:analog_value][:converted_value].to_i>condition[1]
+            return message["analog_value"]["converted_value"].to_i>condition[1]
           else
-            return parsed_msg[:analog_value][:converted_value].to_i<condition[1]
+            return message["analog_value"]["converted_value"].to_i<condition[1]
           end
         end
       end
 
       def handle_sound_command(message)
           Raspeomix.logger.debug (" ------------------ command received : #{message}.")
-        message=parse(message) #unless message.class==Hash
-        if message[:state]=="off"
+        if message["state"]=="off"
           level = 0
         else
-          level = message[:level]
+          level = message["level"]
         end
         set_level(level, @scenario_handler.current_step[:mediatype])
       end
 
       def handle_scenario_command(message)
           Raspeomix.logger.debug (" ------------------ command received: #{message}.")
-        message=parse(message) #unless message.class==Hash
-        case message[:command]
+        case message["command"]
         when "pause"
           pause(@scenario_handler.current_step[:mediatype])
         when "play"
@@ -142,31 +138,16 @@ module Raspeomix
         end
       end
 
-      def handle_webclient_message(message)
-        parsed_msg = parse(message)
-        if parsed_msg[:type]=="event"
-          case parsed_msg[:event]
-          when "pause"
-            pause(@scenario_handler.current_step[:mediatype])
-          when "play"
-            play(@scenario_handler.current_step[:mediatype])
-          when "level"
-            set_level(parsed_msg[:arg], @scenario_handler.current_step[:mediatype])
-          end
-        end
-      end
-
       def handle_input_message(message)
-        parsed_msg = parse(message)
-        Raspeomix.logger.debug (" ------------------ sensor sent message : #{parsed_msg}")
-        if parsed_msg[:type]=="event"
-          case parsed_msg[:event]
+        Raspeomix.logger.debug (" ------------------ sensor sent message : #{message}")
+        if message["type"]=="event"
+          case message["event"]
           when "pause"
             pause(@scenario_handler.playing_media[:type])
           when "play"
             play(@scenario_handler.playing_media[:type])
           when "stop"
-            case parsed_msg[:arg]
+            case message["arg"]
             when "media"
               stop(@scenario_handler.playing_media[:type])
             when "all"
@@ -174,10 +155,6 @@ module Raspeomix
             end
           end
         end
-      end
-
-      def parse(msg)
-        return JSON.parse(msg, :symbolize_names => true)
       end
 
       def finalize

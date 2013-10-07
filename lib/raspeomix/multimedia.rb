@@ -96,19 +96,18 @@ module Raspeomix
 
       def receive_message(message)
         Raspeomix.logger.debug("message received : #{message}")
-        parsed_msg = JSON.parse(message, :symbolize_names => true)
-        if parsed_msg[:type] == "command"
-          if method(parsed_msg[:action]).arity != 0
-            self.send(parsed_msg[:action], parsed_msg[:arg])
+        if message["type"] == "command"
+          if method(message["action"]).arity != 0
+            self.send(message["action"], message["arg"])
           else
-            self.send(parsed_msg[:action])
+            self.send(message["action"])
           end
-        elsif parsed_msg[:type] == "sdl_state"
-          update_handled_state(parsed_msg[:state])
-        elsif parsed_msg[:type] == "omx_state"
-          update_handled_state(parsed_msg[:state])
+        elsif message["type"] == "sdl_state"
+          update_handled_state(message["state"])
+        elsif message["type"] == "omx_state"
+          update_handled_state(message["state"])
         else
-          Raspeomix.logger.error("message type #{parsed_msg[:type]} not recognized, message is : #{parsed_msg}")
+          Raspeomix.logger.error("message type #{message["type"]} not recognized, message is : #{message.inspect}")
         end
       end
 
@@ -131,7 +130,7 @@ module Raspeomix
       end
 
       def publish_property(property_type, property)
-        publish("/#{@properties[:type]}/out", { :type => :property_update, property_type => property }.to_json)
+        publish("/#{@properties[:type]}/out", { :type => :property_update, property_type => property })
       end
 
     end

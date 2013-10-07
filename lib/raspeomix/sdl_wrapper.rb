@@ -20,7 +20,7 @@ module Raspeomix
     end
 
     def send_sdl_state(state)
-      @client.publish("/#{`hostname`.chomp}/image/handler", { :type => :sdl_state, :state => state }.to_json)
+      @client.publish("/#{`hostname`.chomp}/image/handler", { :type => :sdl_state, :state => state })
     end
 
     def load(file)
