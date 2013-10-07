@@ -9,14 +9,15 @@
   "steps": [{
     "step": "wait_for_event",
     "type" : "sensor",
-    "path" : "sensor/analog/an0",
+    "path" : "sensors/analog/an0",
     "value" : "up",
     "edge" : "rising",
-    "threshold" : 200
+    "threshold" : 200,
+    "loop" : 0
   },
   {
     "step": "read_media",
-    "file": "/media/external/videofinale.mp4",
+    "file": "/home/pi/raspeomix/media/kitten.mp4",
     "mediatype": "video",
     "time": 0,
     "loop" : 0

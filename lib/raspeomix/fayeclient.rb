@@ -11,7 +11,7 @@ module Raspeomix
 
     module FayeClient
 
-      def start_client(host='localhost', port='9292')
+      def start_client(host='localhost', port=ENV['RASP_PORT'])
         @faye = Faye::Client.new("http://#{host}:#{port}/faye")
         publish('/system', { :sender => self.class, :msg => "starting" })
         @faye

@@ -1,3 +1,22 @@
+
+$( document ).bind( "pageinit", function( event ) {
+  $('#toggle-sound').bind('slidestop', function() {
+/*    console.log($('#toggle-sound'));
+    if ($('#toggle-sound').prop('value') == 'off') {
+      $('#slider-sound').slider('disable');
+    } else {
+      $('#slider-sound').slider('enable');
+    };*/
+    Raspberry.sound($('#toggle-sound').prop('value'), $('#slider-sound').prop('value')); 
+  });
+  $('#slider-sound').bind('slidestop', function() {
+    console.log($('#slider-sound'));
+    Raspberry.sound($('#toggle-sound').prop('value'), $('#slider-sound').prop('value')); 
+  });
+});
+
+
+
 Logger = {
   incoming: function(message, callback) {
     console.log('incoming', message);
@@ -22,6 +41,9 @@ Raspberry = {
     this._heartbeat  = $('#heartbeat');
     this._heartbeat.hide();
 
+    this._slidersound = $('#slider-sound');
+    this._togglesound = $('#toggle-sound');
+
     this._prefix = location.hostname.split('.')[0];
 
     this._bayeux.addExtension({
@@ -44,6 +66,7 @@ Raspberry = {
     var self = this;
     //this._bayeux.subscribe('/' + this._prefix + '/heartbeats', this.accept, this);
     this._bayeux.subscribe('/heartbeats', this.accept, this);
+    this._bayeux.subscribe('/' + this._prefix + '/sound', this.sound_in, this);
 
     // Detect network problems and disable the form when offline
     this._bayeux.bind('transport:down', function() {
@@ -66,6 +89,26 @@ Raspberry = {
 
   sound: function(state, volume) {
     this._bayeux.publish('/' + this._prefix + '/sound', {state: state, volume: volume});
+  },
+
+  sound_in: function(data) {
+    console.log("sound event in");
+    console.log(data);
+
+    // Toggle
+    console.log(this._togglesound);
+//    this._togglesound.slider({ value: data['state'] });
+    this._togglesound.prop({ value: data['state'] });
+    this._togglesound.slider('refresh');
+
+    if (data['state'] == 'off') {
+      this._slidersound.slider('disable');
+    } else {
+      this._slidersound.slider('enable');
+    }
+
+    // Slider
+    this._slidersound.prop({ value: data['volume'] });
+    this._slidersound.slider('refresh');
   }
 };
-
