@@ -32,9 +32,9 @@ EM.run {
      @client.publish("/#{@hostname}/sound", {:state=>:on, :level=>50}.to_json)
    }
    EM.add_timer(20){
-     @client.publish("/#{@hostname}/webclient/out", {:command=>"pause"}.to_json)
+     @client.publish("/#{@hostname}/scenario", {:command=>"pause"}.to_json)
    }
    EM.add_timer(25){
-     @client.publish("/#{@hostname}/webclient/out", {:command=>"play"}.to_json)
+     @client.publish("/#{@hostname}/scenario", {:command=>"play"}.to_json)
    }
 }
