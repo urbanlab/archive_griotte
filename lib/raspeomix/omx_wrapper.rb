@@ -37,16 +37,18 @@ module Raspeomix
         }
       }
       @file = file
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :ready }.to_json)
+      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :ready })
     end
 
     def send_omx_state(msg)
       case msg.split[0]
       when "Video"
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing }.to_json)
+        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing })
       when "have"
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :stopped }.to_json)
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :idle }.to_json)
+        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :stopped })
+        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :idle })
+      when "Current"
+        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_level, :level => msg.split[3] })
       end
     end
 
@@ -60,13 +62,13 @@ module Raspeomix
 
     def play
       toggle_pause unless @playing
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing }.to_json)
+      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing })
       return true
     end
 
     def pause
       toggle_pause unless !@playing
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :paused }.to_json)
+      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :paused })
       return true
     end
 
@@ -77,8 +79,8 @@ module Raspeomix
 
     def stop
       @iq.push(QUITCHAR)
-      sleep 1
-      @fifo.close
+      #sleep 1
+      #@fifo.close
       #can be done better
       #Process::waitpid(@pipe.pid)
       return true
@@ -93,11 +95,9 @@ module Raspeomix
       while @level != real_lvl
         if @level > real_lvl
           @iq.push(LVLDWN)
-          sleep 0.05 #quickfix to avoid fifo spamming
           @level -= 3
         else
           @iq.push(LVLUP)
-          sleep 0.05
           @level += 3
         end
       end

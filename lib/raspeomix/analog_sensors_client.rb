@@ -138,7 +138,7 @@ module Raspeomix
           end
 
           # Initiate conversion
-          Raspeomix.logger.debug "resolution/rate set to #{resolution}, pga to #{pga}"
+          # Raspeomix.logger.debug "resolution/rate set to #{resolution}, pga to #{pga}"
           @i2c.write(@device, C_READY | CHANNEL[channel] | C_OC_MODE | RESOLUTION[resolution] | PGA[pga])
 
           if resolution == :'18bits' or resolution == :'3_75sps'
@@ -161,16 +161,12 @@ module Raspeomix
           when :'18bits', :'3_75sps'
             # Get last bit of first byte, second byte, third byte
             output_code = ((bytes[0] & 0b00000001) << 16) | (bytes[1] << 8) | bytes[2]
-            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b %8.b" % bytes
           when :'16bits', :'15sps'
             output_code = ((bytes[0] & 0b01111111) << 8) | bytes[1]
-            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
           when :'14bits', :'60sps'
             output_code = ((bytes[0] & 0b00011111) << 8) | bytes[1]
-            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
           when :'12bits', :'240sps'
             output_code = ((bytes[0] & 0b00000111) << 8) | bytes[1]
-            Raspeomix.logger.debug "bytes read %8.b %8.b %8.b" % bytes
           end
 
           # puts "output code is %b %b %b %b (%x %x %x %x)" % (bytes + bytes)
@@ -178,7 +174,6 @@ module Raspeomix
 
           #        puts "output code is %b %b %b %b" % bytes
           # Check MSB (datasheet equation 4-4 p16)
-          Raspeomix.logger.debug "output_code %.8b / %d" % [ output_code, output_code ]
 
           # Sign is always first bit of first byte, whatever the resolution
           # (Cf datasheet p22, table 5-3)
@@ -338,8 +333,6 @@ module Raspeomix
       #
       def update(sensor)
         value = sensor.value
-        Raspeomix.logger.debug "new value on sensor : #{value}"
-        Raspeomix.logger.debug "applying formula #{sensor.profile.conversion_formula}"
         val = RPNCalculator.evaluate(sensor.profile.conversion_formula.gsub('x', value.to_s)) 
         message = { :type => :analog_value,
                     :analog_value => {
@@ -349,8 +342,7 @@ module Raspeomix
                       :converted_value => val
                     }
                   }
-        Raspeomix.logger.debug "message dump #{message.inspect}"
-        publish("/sensors/analog/#{sensor.channel}", message.to_json)
+        publish("/sensors/analog/#{sensor.channel}", message)
       end
     end
 

@@ -24,18 +24,24 @@ module EventMachine
 
     def receive_data data
       data.scan(OMX_REGEXP).each { |str| #log __method__,str
-                                   @output_queue.push(str)}
+        @output_queue.push(str)
+      }
     end
 
     def unbind
     end
 
     def input_check_loop
-      EM.add_periodic_timer(0.5) {
-        @input_queue.pop { |char|
-          send_data(char)
-        }
-      }
+#       EM.add_periodic_timer(0.1) {
+#         @input_queue.pop { |char|
+#           puts "sending #{char} to omxplayer"
+#           send_data(char)
+#         }
+#       }
+      @input_queue.pop { |char|
+        send_data(char)
+        input_check_loop
+     }
     end
   end
 

@@ -27,23 +27,23 @@ module Raspeomix
       end
 
       def start
-        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :start }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :start })
       end
 
       def pause
-        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :pause }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :pause })
       end
 
       def play
-        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :play }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :play })
       end
 
       def stop
-        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :stop, :arg => :media }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type => :event, :event => :stop, :arg => :media })
       end
 
       def stop_all
-        publish("/#{@properties[:sensor_type]}/out", { :type=> :event, :event =>:stop, :arg => :all }.to_json)
+        publish("/#{@properties[:sensor_type]}/out", { :type=> :event, :event =>:stop, :arg => :all })
       end
 
     end
