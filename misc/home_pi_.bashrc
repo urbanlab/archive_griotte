@@ -104,13 +104,23 @@ fi
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
+start_raspeomix_server() {
+  BASEDIR="/home/pi/raspeomix/"
+  . /etc/default/raspeomix
+
+  rm $BASEDIR/tmp/pids/thin.pid
+  echo -n "raspeomix..."
+
+  cd $BASEDIR && RASP_PORT=$RASP_PORT RASP_LOG=$RASP_LOG bundle exec rake server:start
+
+}
+
 start_raspeomix_clients() {
   BASEDIR="/home/pi/raspeomix/"
   . /etc/default/raspeomix
   for i in $RASP_CLIENTS; do
     echo -n "$i"...
     cd $BASEDIR && RASP_PORT=$RASP_PORT RASP_LOG=$RASP_LOG bundle exec rake client:start[$i]
-    sleep 10
   done
   echo done
 }
@@ -118,31 +128,21 @@ start_raspeomix_clients() {
 CONSOLE_TYPE=`fgconsole 2>/dev/null`
 
 if [ "x$CONSOLE_TYPE" == "x1" ]; then
-  echo "Starting raspeomix clients in 5 seconds. Press Ctrl-C to get a shell..."
+  echo "Starting raspeomix server and clients in 5 seconds. Press Ctrl-C to get a shell..."
   sleep 5
-  
+
+  start_raspeomix_server  
   start_raspeomix_clients
 
-  echo -n "Disabling screen blanking..."
+  sleep 1
+
+  reset
+
   setterm -blank 0
-  echo "done"
-
-  echo -n "Disabling powerdown timer..."
   setterm -powerdown 0 
-  echo "done"
-
-  echo -n "Disabling power saving..."
   setterm -powersave off
-  echo "done"
-  
-  echo -n "Disabling cursor..."
   setterm -cursor off
-  echo "done"
-  
-  echo -n "Disabling kernel messages..."
   sudo setterm -msg off
-  echo "done"
-
 
   export PS1=""
 
