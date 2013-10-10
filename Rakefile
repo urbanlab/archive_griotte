@@ -3,13 +3,22 @@ require 'yard/rake/yardoc_task'
 
 require 'rspec/core/rake_task'
 
+$log_dir = ENV['RASP_LOG']
+$log_dir = "/dev/null" if $log_dir.nil? or $log_dir.size == 0
+
+$clients = ENV['RASP_CLIENTS']
+$clients = "scheduler" if $clients.nil? or $clients.size == 0
+
+$server_port = ENV['RASP_PORT']
+$server_port = "3000" if $server_port.nil? or $server_port.size == 0
+
 # Import subtasks
 Dir.glob(File.expand_path('../tasks/*.rake', __FILE__)).each do |f|
     import(f)
 end
 
-desc 'Default: run specs.'
-task :default => "spec:spec"
+desc 'Default: show config.'
+task :default => "config:show"
 
 desc "Starts the whole stuff"
 task :start => [ 'utils:clearfb', 'server:start', 'clients:analog_sensors:start' ]

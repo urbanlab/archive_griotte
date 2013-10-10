@@ -1,16 +1,20 @@
 require 'rake'
 
 namespace :server do
-  desc "Starts the faye and web server"
+  desc "Starts the faye/web server"
+
+  if $log_dir == "/dev/null"
+    log = $log_dir
+  else 
+    log = "#{$log_dir}/thin.log" 
+  end
 
   task :start do
-    log = ENV['RASP_LOG']
-    log = "/dev/null" if log.size == 0
-    `bundle exe thin -e production -R server/config.ru -p #{ENV['RASP_PORT']} --log #{log} -d start`
+    `thin -e production -R server/config.ru -p #{$server_port} --log #{log} -d start`
   end
 
   task :stop do
-    `bundle exec thin -e production -R server/config.ru -p #{ENV['RASP_PORT']} -d stop`
+    `thin -e production -R server/config.ru -p #{$server_port} -d stop`
   end
 end
 
