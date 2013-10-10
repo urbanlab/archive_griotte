@@ -115,11 +115,11 @@ Raspberry = {
       state = 'off'
     }
 */
-    this._togglescenario.prop({ value: state });
+    this._togglescenario.prop({ value: data['command'] });
     this._togglescenario.slider('refresh');
   },
 
-  scenario_in: function(data) {
+/*  scenario_in: function(data) {
     console.log("scenario event in");
     console.log(data);
 
@@ -134,8 +134,8 @@ Raspberry = {
 
     this._togglescenario.prop({ value: state });
     this._togglescenario.slider('refresh');
-  }
-
+  },
+*/
   sound_in: function(data) {
     console.log("sound event in");
     console.log(data);

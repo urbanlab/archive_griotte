@@ -1,6 +1,7 @@
 <!DOCTYPE html> 
 <html>
   <head>
+    <link rel="icon" type="image/png" href="img/raspberry_pi.png">
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
 
@@ -12,10 +13,44 @@
     <script src="/faye/client.js" type="text/javascript"></script>
   </head>
   <body>
-    <div data-role="page">
+    <div data-role="page" id="live">
       <div data-role="header">
+
         <h1>Raspeomix</h1>
+        <div data-role="navbar" data-iconpos="bottom">
+          <ul>
+            <li><a href="#live" data-icon="star" class="ui-btn-active">Live</a></li>
+            <li><a href="#control" data-icon="grid">Contrôle</a></li>
+            <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
+          </ul>
+        </div><!-- /navbar -->
+
       </div>
+
+      <div data-role="content">
+
+        Playing </strong>videofinale.mp4</strong>
+
+        <label for="slider-4">Progression</label>
+        <input name="slider-4" id="slider-4" data-mini="true" min="0" max="100" value="50" type="range" data-highlight="true">
+
+      </div> <!-- content -->
+    </div> <!-- page live -->
+
+    <div data-role="page" id="control">
+      <div data-role="header">
+
+        <h1>Raspeomix</h1>
+        <div data-role="navbar" data-iconpos="bottom">
+          <ul>
+            <li><a href="#live" data-icon="star">Live</a></li>
+            <li><a href="#control" data-icon="grid" class="ui-btn-active">Contrôle</a></li>
+            <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
+          </ul>
+        </div> <!-- /navbar -->
+      </div> <!-- header -->
 
       <div data-role="content">
         <div>
@@ -39,7 +74,7 @@
           </div>
           <div data-role="fieldcontain">
             <label for="slider-sound">Volume</label>
-            <input type="range" name="slider-sound" id="slider-sound" value="25" min="0" max="100" data-highlight="true">
+            <input type="range" step="10" name="slider-sound" id="slider-sound" value="20" min="0" max="100" data-highlight="true">
           </div>
         </form>
       </div> <!-- content -->
@@ -48,8 +83,135 @@
         <h4>&copy ERASME 2013</h4>
       </div><!-- /footer -->
 
-    </div> <!-- /page -->
+    </div> <!-- /page control -->
+
+    <div data-role="page" id="scenario">
+      <div data-role="header">
+
+        <h1>Raspeomix</h1>
+        <div data-role="navbar" data-iconpos="bottom">
+          <ul>
+            <li><a href="#live" data-icon="star">Live</a></li>
+            <li><a href="#control" data-icon="grid">Contrôle</a></li>
+            <li><a href="#scenario" data-icon="gear" class="ui-btn-active">Scenario</a></li>
+            <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
+          </ul>
+        </div><!-- /navbar -->
+
+      </div>
+
+      <div data-role="content">
+        Scenario stuff
+      </div> <!-- content -->
+    </div> <!-- page cenario-->
+
+    <div data-role="page" id="monitor">
+      <div data-role="header">
+
+        <h1>Raspeomix</h1>
+        <div data-role="navbar" data-iconpos="bottom">
+          <ul>
+            <li><a href="#live" data-icon="star">Live</a></li>
+            <li><a href="#control" data-icon="grid">Contrôle</a></li>
+            <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#monitor" data-icon="alert" class="ui-btn-active">Moniteur</a></li>
+          </ul>
+        </div><!-- /navbar -->
+
+      </div>
+
+      <div data-role="content">
+
+        <div data-role="collapsible-set">
+          <div data-role="collapsible">
+            <h3>Services</h3>
+            <p>Liste des services en cours de fonctionnment</p>
+
+            <div data-role="fieldcontain">
+              <label for="slider_scheduler">Scheduler</label>
+              <select name="slider_scheduler" id="slider_scheduler" data-role="slider" data-mini="true">
+                <option value="off">Off</option>
+                <option value="on" selected>On</option>
+              </select>
+            </div> <!-- fieldcontain -->
+            <div data-role="fieldcontain">
+              <label for="slider_videoclient">Video/Son</label>
+              <select name="slider_videoclient" id="slider_videoclient" data-role="slider" data-mini="true">
+                <option value="off">Off</option>
+                <option value="on" selected>On</option>
+              </select>
+            </div> <!-- fieldcontain -->
+            <div data-role="fieldcontain">
+              <label for="slider_imageclient">Image</label>
+              <select name="slider_imageclient" id="slider_imageclient" data-role="slider" data-mini="true">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+              </select>
+            </div> <!-- fieldcontain -->
+            <div data-role="fieldcontain">
+              <label for="slider_analog">Capteurs analogiques</label>
+              <select name="slider_analog" id="slider_analog" data-role="slider" data-mini="true">
+                <option value="off">Off</option>
+                <option value="on" selected>On</option>
+              </select>
+            </div> <!-- fieldcontain -->
+            <div data-role="fieldcontain">
+              <label for="slider_digital">Capteurs digitaux</label>
+              <select name="slider_digital" id="slider_digital" data-role="slider" data-mini="true">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+              </select>
+            </div> <!-- fieldcontain -->
+          </div> <!-- collapsible -->
+
+          <div data-role="collapsible">
+            <h3>Logs</h3>
+            <p>Logs des services en cours</p>
+
+
+            <fieldset data-role="controlgroup" data-type="horizontal">
+              <input name="log-level-debug" id="log-level-debug" value="on" checked="checked" type="checkbox">
+              <label for="log-level-debug">Debug</label>
+              <input name="log-level-info" id="log-level-info" value="off" type="checkbox">
+              <label for="log-level-info">Info</label>
+              <input name="log-level-warn" id="log-level-warn" value="other" type="checkbox">
+              <label for="log-level-warn">Warn</label>
+              <input name="log-level-error" id="log-level-error" value="other" type="checkbox">
+              <label for="log-level-error">Error</label>
+              <input name="log-level-fatal" id="log-level-fatal" value="other" type="checkbox">
+              <label for="log-level-fatal">Fatal</label>
+            </fieldset>
+            <label for="log-filter">Filtre faye</label>
+            <input name="log-filter" type="text" value="sound/*">
+
+            <textarea cols="40" rows="25" name="textarea" id="textarea">
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Accepting connection from "j9kq4i1zrs2zz80qjirhf9x6si2kr5u"
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Ping "j9kq4i1zrs2zz80qjirhf9x6si2kr5u", 25
+2013-10-10 13:38:35 [DEBUG] [Faye::RackAdapter] Received message via WebSocket[hybi-13]: "[{\"channel\":\"/meta/connect\",\"clientId\":\"4hnq240qg45xg9uo0cig55rth2rkhz2\",\"connectionType\":\"websocket\",\"id\":\"1t\"}]"
+2013-10-10 13:38:35 [DEBUG] [Faye::Server] Passing through incoming extensions: {"channel":"/meta/connect","clientId":"4hnq240qg45xg9uo0cig55rth2rkhz2","connectionType":"websocket","id":"1t"}
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Accepting connection from "4hnq240qg45xg9uo0cig55rth2rkhz2"
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Ping "4hnq240qg45xg9uo0cig55rth2rkhz2", 25
+2013-10-10 13:38:35 [DEBUG] [Faye::RackAdapter] Received message via WebSocket[hybi-13]: "[{\"channel\":\"/meta/connect\",\"clientId\":\"lhex2jkjrm92290mzcc2gfjwd1v9kto\",\"connectionType\":\"websocket\",\"id\":\"1t\"}]"
+2013-10-10 13:38:35 [DEBUG] [Faye::Server] Passing through incoming extensions: {"channel":"/meta/connect","clientId":"lhex2jkjrm92290mzcc2gfjwd1v9kto","connectionType":"websocket","id":"1t"}
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Accepting connection from "lhex2jkjrm92290mzcc2gfjwd1v9kto"
+2013-10-10 13:38:35 [DEBUG] [Faye::Engine::Proxy] Ping "lhex2jkjrm92290mzcc2gfjwd1v9kto", 25
+2013-10-10 13:38:40 [DEBUG] [Faye::Server] Processing reply: {"id":"5","clientId":"32sxc0920zwlx2w934fnrqwx3bz2qf5","channel":"/meta/connect","successful":true,"advice":{"reconnect":"retry","interval":0,"timeout":25000}}
+2013-10-10 13:38:40 [DEBUG] [Faye::Server] Passing through outgoing extensions: {"id":"5","clientId":"32sxc0920zwlx2w934fnrqwx3bz2qf5","channel":"/meta/connect","successful":true,"advice":{"reconnect":"retry","interval":0,"timeout":25000}}
+2013-10-10 13:38:41 [DEBUG] [Faye::RackAdapter] Received message via WebSocket[hybi-13]: "[{\"channel\":\"/meta/connect\",\"clientId\":\"32sxc0920zwlx2w934fnrqwx3bz2qf5\",\"connectionType\":\"websocket\",\"id\":\"6\"}]"
+2013-10-10 13:38:41 [DEBUG] [Faye::Server] Passing through incoming extensions: {"channel":"/meta/connect","clientId":"32sxc0920zwlx2w934fnrqwx3bz2qf5","connectionType":"websocket","id":"6"}
+2013-10-10 13:38:41 [DEBUG] [Faye::Engine::Proxy] Accepting connection from "32sxc0920zwlx2w934fnrqwx3bz2qf5"
+2013-10-10 13:38:41 [DEBUG] [Faye::Engine::Proxy] Ping "32sxc0920zwlx2w934fnrqwx3bz2qf5", 25
+            </textarea>
+          </div> <!-- collapsible -->
+        </div> <!-- collapsible-set -->
+
+      </div> <!-- content -->
+    </div> <!-- page monitor -->
+
+
+
   </body>
+
 <script type="text/javascript">
   $( document ).bind( "pageinit", function( event ) {
 
