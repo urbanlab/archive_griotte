@@ -3,9 +3,11 @@ require 'faye'
 
 ROOT_DIR = File.expand_path('../', __FILE__)
 
-set :root, ROOT_DIR
-set :logging, false
-
+#set :root, ROOT_DIR
+set :logging, true
+#set :public, ROOT_DIR.'/public/'
+set :static, true
+ 
 # Change me
 set :password, 'foobar'
 set :app_id, 'raspeomix-123456'
@@ -16,7 +18,7 @@ enable :sessions
 # Authentication helpers
 helpers do
   def admin? ; session[settings.app_id] == settings.token ; end
-  def protected! ; halt [ 401, 'Not Authorized' ] unless admin? ; end
+  def protected! ; redirect '/login/' unless admin? ; end
 end
 
 get '/favicon.ico' do
@@ -25,7 +27,7 @@ end
 
 get '/login/' do
   redirect '/admin/' if admin?
-  File.read(File.join(ROOT_DIR, 'public/login/index.html'))
+  pass
 end
 
 get '/logout/' do
@@ -42,22 +44,28 @@ post '/login/' do
   end
 end
 
-# Redirects to the same place with a / at the end
-# Note that this prevents sinatra from serving file in the top directory
-get '/:dir' do
-  redirect "#{params[:dir]}/"
-#  File.read(ROOT_DIR + "/public/#{params[:dir]}/index.html')
-end
-
 get '/admin/' do
   protected!
-  File.read(File.join(ROOT_DIR, 'public/admin/index.html'))
+  pass
 end
 
+# # Redirects to the same place with a / at the end
+# # Note that this prevents sinatra from serving file in the top directory
+# get '/:dir' do
+#   redirect "#{params[:dir]}/"
+# #  File.read(ROOT_DIR + "/public/#{params[:dir]}/index.html')
+# end
+# 
 get '/:dir/' do
+# #  puts request.inspect
+# #  puts request['HTTP_ACCEPT_LANGUAGE']
+#   puts request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
+# #  File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
+#   puts "Sending file #{params[:dir]}/index.html"
+#   #sFile.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))end_file("#{params[:dir]}/index.html")
   File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
 end
-
+# 
 
 #get '/post' do
 #  env['faye.client'].publish('/mentioning/*', {
