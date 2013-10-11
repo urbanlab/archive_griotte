@@ -60,15 +60,14 @@ end
 get '/cartels/:id/?' do
   lang = request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
   localized = File.join(ROOT_DIR, 'public', 'cartels', params[:id], lang, 'index.html')
-  puts "lang is #{lang} / localized path could be #{localized}"
   redirect "/cartels/#{params[:id]}/#{lang}/index.html" if File.exists?(localized)
   pass 
 end
 
-#get '/:dir/' do
-#  File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
-#end
-# 
+get '/:dir/?' do
+  send_file(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
+end
+ 
 
 #get '/post' do
 #  env['faye.client'].publish('/mentioning/*', {

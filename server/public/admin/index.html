@@ -1,6 +1,13 @@
 <!DOCTYPE html> 
 <html>
   <head>
+    <style type="text/css">
+      #graph-container {
+        width : 400px;
+        height: 200px;
+        margin: 8px auto;
+      }
+    </style>
     <link rel="icon" type="image/png" href="/img/raspberry_pi.png">
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -10,6 +17,7 @@
     <script src="/js/jquery-1.9.1.js" type="text/javascript"></script>
     <script src="/js/jquery.mobile-1.3.1.js" type="text/javascript"></script>
     <script src="/admin/js/raspberry.js" type="text/javascript"></script>
+    <script src="/js/flotr2.min.js" type="text/javascript"></script>
     <script src="/faye/client.js" type="text/javascript"></script>
   </head>
   <body>
@@ -22,6 +30,7 @@
             <li><a href="#" data-icon="star" class="ui-state-persist ui-btn-active">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#cartels" data-icon="info">Cartels</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
           </ul>
         </div><!-- /navbar -->
@@ -47,6 +56,7 @@
             <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#" data-icon="grid" class="ui-state-persist ui-btn-active">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#cartels" data-icon="info">Cartels</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
           </ul>
         </div> <!-- /navbar -->
@@ -94,6 +104,7 @@
             <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear" class="ui-state-persist ui-btn-active">Scenario</a></li>
+            <li><a href="#cartels" data-icon="info">Cartels</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
           </ul>
         </div><!-- /navbar -->
@@ -102,6 +113,36 @@
 
       <div data-role="content">
         Scenario stuff
+      </div> <!-- content -->
+    </div> <!-- page scenario-->
+
+    <div data-role="page" id="cartels">
+      <div data-role="header">
+
+        <h1>Raspeomix</h1>
+        <div data-role="navbar" data-iconpos="bottom">
+          <ul>
+            <li><a href="#live" data-icon="star">Live</a></li>
+            <li><a href="#control" data-icon="grid">Contrôle</a></li>
+            <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#cartels" data-icon="info" class="ui-state-persist ui-btn-active">Cartels</a></li>
+            <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
+          </ul>
+        </div><!-- /navbar -->
+
+      </div>
+
+      <div data-role="content">
+        <div class="content-primary">
+          <ul data-role="listview">
+            <li data-role="list-divider">Demo</li>
+            <li><a href="/cartels/demo/fr/index.html" target="_blank">fr</a></li>
+            <li><a href="/cartels/demo/en/index.html" target="_blank">en</a></li>
+            <li data-role="list-divider">Demo</li>
+            <li><a href="/cartels/demo/fr/index.html" target="_blank">fr</a></li>
+            <li><a href="/cartels/demo/en/index.html" target="_blank">en</a></li>
+          </ul> 
+        </div>
       </div> <!-- content -->
     </div> <!-- page cenario-->
 
@@ -114,6 +155,7 @@
             <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
+            <li><a href="#cartels" data-icon="info">Cartels</a></li>
             <li><a href="#monitor" data-icon="alert" class="ui-state-persist ui-btn-active">Moniteur</a></li>
           </ul>
         </div><!-- /navbar -->
@@ -165,6 +207,40 @@
           </div> <!-- collapsible -->
 
           <div data-role="collapsible">
+            <h3>Capteurs</h3>
+            <p>État des capteurs</p>
+
+            <ul data-role="listview">
+              <li data-role="list-divider">Analogiques</li>
+              <li><a href="#analog0" data-rel="dialog">AN0</a></li>
+              <li><a href="#analog1" data-rel="dialog">AN1</a></li>
+              <li><a href="#analog2" data-rel="dialog">AN2</a></li>
+              <li><a href="#analog3" data-rel="dialog">AN3</a></li>
+              <li data-role="list-divider">Digitaux</li>
+              <li><a href="#digital0" data-rel="dialog">IO0</a></li>
+              <li><a href="#digital1" data-rel="dialog">IO1</a></li>
+              <li><a href="#digital2" data-rel="dialog">IO2</a></li>
+              <li><a href="#digital3" data-rel="dialog">IO3</a></li>
+            </ul> 
+
+          </div>
+
+          <div data-role="collapsible">
+            <h3>Automatisation</h3>
+            <p>Arrêt automatique</p>
+
+            <div data-role="fieldcontain">
+              <label for="autoshutdown">Arrêt automatique</label>
+              <input type="checkbox" name="autoshutdown" id="autoshutdown" class="custom" />
+              <label for="time">Heure d'arrêt</label>
+              <input type="time" name="time" id="time" value="" />
+              <label for="projector">Coupure du vidéo projecteur</label>
+              <input type="checkbox" name="projector" id="projector" class="custom" />
+            </div>
+
+          </div>
+
+          <div data-role="collapsible">
             <h3>Logs</h3>
             <p>Logs des services en cours</p>
 
@@ -214,6 +290,15 @@
       </div> <!-- content -->
     </div> <!-- page monitor -->
 
+    <div data-role="page" id="analog0">
+      <div data-role="header">
+        <h1>Analog 0</h1>
+      </div>
+
+      <div data-role="content">
+        <div id="graph-container"></div>
+      </div> <!-- content -->
+    </div> <!-- page  -->
 
 
   </body>
@@ -221,7 +306,7 @@
 <script type="text/javascript">
   $( document ).bind( "pageinit", function( event ) {
 
-  Faye.Logging.logLevel = 'debug';
+  Faye.Logging.logLevel = 'error';
 
   var scheme = window.location.protocol,
   host   = location.hostname,
@@ -234,6 +319,80 @@
   Raspberry.launch();
 
   });
+</script>
+
+<script type="text/javascript">
+$( document ).bind( "pageinit", function( event ) {
+    var container = document.getElementById('graph-container'),
+    start = (new Date).getTime(),
+    data, graph, offset, i;
+
+    // Draw a sine curve at time t
+    function animate (t) {
+
+    data = [];
+    offset = 2 * Math.PI * (t - start) / 10000;
+
+    // Sample the sine function
+    for (i = 0; i < 4 * Math.PI; i += 0.2) {
+    data.push([i, Math.sin(i - offset)]);
+    }
+
+    // Draw Graph
+    graph = Flotr.draw(container, [ data ], {
+        yaxis : {
+        max : 2,
+        min : -2
+        }
+      });
+
+    // Animate
+    setTimeout(function () {
+        animate((new Date).getTime());
+        }, 50);
+    }
+
+});
+
+$( "#analog0" ).on("pageshow", function() {
+    console.log("animating from pageshow");
+    var container = document.getElementById('graph-container'),
+    start = (new Date).getTime(),
+    data, graph, offset, i;
+
+    // Draw a sine curve at time t
+    function animate (t) {
+    data = [];
+    offset = 2 * Math.PI * (t - start) / 10000;
+
+    // Sample the sine function
+    for (i = 0; i < 4 * Math.PI; i += 0.2) {
+    data.push([i, Math.sin(i - offset)]);
+    }
+
+    // Draw Graph
+    graph = Flotr.draw(container, [ data ], {
+        yaxis : {
+        max : 2,
+        min : -2
+        }
+      });
+
+    // Animate
+    setTimeout(function () {
+        animate((new Date).getTime());
+        }, 50);
+    }
+
+      animate((start));
+
+});
+$( "#analog0" ).bind({
+   create: function(event, ui) {
+      console.log("animating");
+      animate((new Date).getTime());
+    }
+});
 </script>
 
 </html>
