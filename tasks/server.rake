@@ -3,6 +3,7 @@ require 'rake'
 namespace :server do
   desc "Starts the faye/web server"
 
+  # TODO: STDOUT ??
   if $log_dir == "/dev/null"
     log = $log_dir
   else 
