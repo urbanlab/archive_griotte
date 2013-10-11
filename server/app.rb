@@ -25,12 +25,12 @@ get '/favicon.ico' do
   halt 404
 end
 
-get '/login/' do
+get '/login/?' do
   redirect '/admin/' if admin?
   pass
 end
 
-get '/logout/' do
+get '/logout/?' do
   session.clear
   redirect '/login/'
 end
@@ -44,7 +44,7 @@ post '/login/' do
   end
 end
 
-get '/admin/' do
+get '/admin/?' do
   protected!
   pass
 end
@@ -56,15 +56,18 @@ end
 # #  File.read(ROOT_DIR + "/public/#{params[:dir]}/index.html')
 # end
 # 
-get '/:dir/' do
-# #  puts request.inspect
-# #  puts request['HTTP_ACCEPT_LANGUAGE']
-#   puts request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
-# #  File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
-#   puts "Sending file #{params[:dir]}/index.html"
-#   #sFile.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))end_file("#{params[:dir]}/index.html")
-  File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
+
+get '/cartels/:id/?' do
+  lang = request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
+  localized = File.join(ROOT_DIR, 'public', 'cartels', params[:id], lang, 'index.html')
+  puts "lang is #{lang} / localized path could be #{localized}"
+  redirect "/cartels/#{params[:id]}/#{lang}/index.html" if File.exists?(localized)
+  pass 
 end
+
+#get '/:dir/' do
+#  File.read(File.join(ROOT_DIR, 'public', params[:dir], 'index.html'))
+#end
 # 
 
 #get '/post' do
