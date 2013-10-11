@@ -13,6 +13,8 @@ set :password, 'foobar'
 set :app_id, 'raspeomix-123456'
 set :token, (0...32).map { (97 + rand(26)).chr }.join
 
+set :default_locale, "fr"
+
 enable :sessions
 
 # Authentication helpers
@@ -61,6 +63,8 @@ get '/cartels/:id/?' do
   lang = request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first
   localized = File.join(ROOT_DIR, 'public', 'cartels', params[:id], lang, 'index.html')
   redirect "/cartels/#{params[:id]}/#{lang}/index.html" if File.exists?(localized)
+  # Redirect to default locale if brower locale is not found
+  redirect "/cartels/#{params[:id]}/#{settings.default_locale}/index.html"
   pass 
 end
 

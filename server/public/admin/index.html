@@ -13,18 +13,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
 
     <title>Raspeomix Server</title>
+    <link rel="stylesheet" href="/css/jquery-ui-1.9.2.css" type="text/css" media="screen">
     <link rel="stylesheet" href="/css/jquery.mobile-1.3.2.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/jsplumb.css" type="text/css" media="screen">
     <script src="/js/jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="/js/jquery-ui-1.9.2-min.js" type="text/javascript"></script>
     <script src="/js/jquery.mobile-1.3.1.js" type="text/javascript"></script>
     <script src="/admin/js/raspberry.js" type="text/javascript"></script>
     <script src="/js/flotr2.min.js" type="text/javascript"></script>
+    <script src="/js/jquery.jsPlumb-1.5.2-min.js" type="text/javascript"></script> 
+    <script src="/admin/js/jsplumbmock.js" type="text/javascript"></script> 
     <script src="/faye/client.js" type="text/javascript"></script>
   </head>
   <body>
     <div data-role="page" id="live">
       <div data-role="header">
 
-        <h1>Raspeomixx</h1>
+        <h1>Raspeomix</h1>
+        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#" data-icon="star" class="ui-state-persist ui-btn-active">Live</a></li>
@@ -51,6 +57,8 @@
       <div data-role="header">
 
         <h1>Raspeomix</h1>
+        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
+
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
@@ -96,9 +104,15 @@
     </div> <!-- /page control -->
 
     <div data-role="page" id="scenario">
+      <div data-role="panel" id="scenario-panel">
+        <!-- panel content goes here -->
+      </div><!-- /panel -->
+
       <div data-role="header">
 
         <h1>Raspeomix</h1>
+        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
+
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
@@ -109,10 +123,22 @@
           </ul>
         </div><!-- /navbar -->
 
+        <div data-role="footer">
+          <a href="#scenario-panel" data-icon="plus" class="ui-btn-right">Ajouter</a>
+        </div>
       </div>
 
       <div data-role="content">
-        Scenario stuff
+ 
+        <div id="plumb"> 
+          <div id="render"></div>
+          <div class="w" id="opened">Départ<div class="ep"></div></div>
+          <div class="w" id="phone1">Capteur AN0<div class="ep"></div></div>
+          <div class="w" id="phone2">Lecture vidéo<div class="ep"></div></div>
+          <div class="w" id="inperson">Pause<div class="ep"></div></div>
+          <div class="w" id="rejected">Capteur IO1<div class="ep"></div></div> 
+        </div>
+
       </div> <!-- content -->
     </div> <!-- page scenario-->
 
@@ -120,6 +146,8 @@
       <div data-role="header">
 
         <h1>Raspeomix</h1>
+
+        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
@@ -150,6 +178,8 @@
       <div data-role="header">
 
         <h1>Raspeomix</h1>
+        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
+
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
@@ -322,38 +352,6 @@
 </script>
 
 <script type="text/javascript">
-$( document ).bind( "pageinit", function( event ) {
-    var container = document.getElementById('graph-container'),
-    start = (new Date).getTime(),
-    data, graph, offset, i;
-
-    // Draw a sine curve at time t
-    function animate (t) {
-
-    data = [];
-    offset = 2 * Math.PI * (t - start) / 10000;
-
-    // Sample the sine function
-    for (i = 0; i < 4 * Math.PI; i += 0.2) {
-    data.push([i, Math.sin(i - offset)]);
-    }
-
-    // Draw Graph
-    graph = Flotr.draw(container, [ data ], {
-        yaxis : {
-        max : 2,
-        min : -2
-        }
-      });
-
-    // Animate
-    setTimeout(function () {
-        animate((new Date).getTime());
-        }, 50);
-    }
-
-});
-
 $( "#analog0" ).on("pageshow", function() {
     console.log("animating from pageshow");
     var container = document.getElementById('graph-container'),
@@ -384,14 +382,8 @@ $( "#analog0" ).on("pageshow", function() {
         }, 50);
     }
 
-      animate((start));
+    animate((start));
 
-});
-$( "#analog0" ).bind({
-   create: function(event, ui) {
-      console.log("animating");
-      animate((new Date).getTime());
-    }
 });
 </script>
 
