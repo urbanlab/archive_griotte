@@ -35,12 +35,48 @@ module Raspeomix
 
       def register
         Raspeomix.logger.debug("registering...")
-        subscribe("/video/out") { |message| handle_client_message(:video, message) }
-        subscribe("/image/out") { |message| handle_client_message(:image, message) }
-        subscribe("/sensors/analog/an0") { |message| handle_client_message("sensors/analog/an0", message) }
+        subscribe("/video/out") { |message| check_next_step(message) }
+        subscribe("/image/out") { |message| check_next_step(message) }
+        subscribe("/sensors/analog/an0") { |message| check_next_step(message) }
         subscribe("/sound") {|message| handle_sound_command(message) }
         subscribe("/scenario") {|message| handle_scenario_command(message) }
         Raspeomix.logger.debug("registered")
+      end
+
+      def check_next_step(message)
+        Raspeomix.logger.debug (" ------------------ received message : #{message}.")
+        if message["type"] == "client_update"
+          if compare(@scenario_handler.next_step_conditions, message["properties"])
+            @scenario_handler.go_to_next_step
+            play_step
+          end
+        end
+      end
+
+      def compare(conditions_array, message)
+        bool = true
+        conditions_array.each { |conditions|
+          conditions.keys.each { |key|
+            unless key == "RPN_condition"
+              #simple comparison
+              unless message[key]==nil
+                bool = bool & (message[key]==conditions[key])
+              else
+                bool = false
+              end
+            else
+              #compares using RPN to check if value is superior or inferior
+              unless message[conditions[key]["checked_value"].to_s]==nil
+                bool = bool & (RPNCalculator.evaluate(conditions["RPN_condition"]["RPNexp"].sub!("x",  message[conditions["RPN_condition"]["checked_value"].to_s].to_s)))
+              else
+                bool = false
+              end
+            end
+          }
+          return true if bool
+          bool = true
+        }
+        return false
       end
 
       def load(file, client)
@@ -81,7 +117,6 @@ module Raspeomix
 
       def handle_client_message(client, message)
         if isplaying?
-          Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}.")
           #parse json message
           #start client if ready
           if message["type"]=="property_update" and message["state"]=="ready"
@@ -119,7 +154,7 @@ module Raspeomix
       end
 
       def handle_sound_command(message)
-          Raspeomix.logger.debug (" ------------------ command received : #{message}.")
+        Raspeomix.logger.debug (" ------------------ command received : #{message}.")
         if message["state"]=="off"
           level = 0
         else
@@ -129,7 +164,7 @@ module Raspeomix
       end
 
       def handle_scenario_command(message)
-          Raspeomix.logger.debug (" ------------------ command received: #{message}.")
+        Raspeomix.logger.debug (" ------------------ command received: #{message}.")
         case message["command"]
         when "pause"
           pause(@scenario_handler.current_step[:mediatype])
@@ -165,10 +200,12 @@ module Raspeomix
         case @scenario_handler.current_step[:step]
         when "read_media"
           load(@scenario_handler.current_step[:file], @scenario_handler.current_step[:mediatype])
+          start(@scenario_handler.current_step[:mediatype], 0)
         when "pause_reading"
           load("black", "image")
+          start("image", @scenario_handler.current_step[:time])
         when "wait_for_event"
-          #TODO
+          Raspeomix.logger.debug("waiting for event")
         end
       end
 

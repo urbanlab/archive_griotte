@@ -334,8 +334,8 @@ module Raspeomix
       def update(sensor)
         value = sensor.value
         val = RPNCalculator.evaluate(sensor.profile.conversion_formula.gsub('x', value.to_s)) 
-        message = { :type => :analog_value,
-                    :analog_value => {
+        message = { :type => :client_update, :properties => {
+                      :client => "/sensors/analog/#{sensor.channel}",
                       :profile => sensor.profile.name,
                       :unit => sensor.profile.unit,
                       :raw_value => value,

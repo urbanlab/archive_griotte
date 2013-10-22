@@ -18,7 +18,8 @@ module Raspeomix
       include FayeClient
 
       def initialize(type, handler)
-        @properties = {:type => type, :state => :initializing, :out_level => 0 }
+        @type = type
+        @properties = {:client => @type, :state => :initializing, :volume => 0, :position => 0}
         start_client('localhost', 9292)
         in_register(type)
         register("/#{type}/handler")
@@ -28,6 +29,10 @@ module Raspeomix
       def update_wrapped_state(state)
         Raspeomix.logger.debug("wrapper sent state : #{state}")
         update_state(state)
+      end
+
+      def send_char(char) # for testing purposes only
+        @handler.send_char char
       end
 
       def load(file)
@@ -103,15 +108,42 @@ module Raspeomix
             self.send(message["action"])
           end
         elsif message["type"] == "sdl_state"
-          update_handled_state(message["state"])
+          update_sdl(message["state"])
         elsif message["type"] == "omx_state"
-          update_handled_state(message["state"])
+          update_omx(message)
         else
           Raspeomix.logger.error("message type #{message["type"]} not recognized, message is : #{message.inspect}")
         end
       end
 
-      def update_handled_state(state)
+      def update_omx(message)
+        case message["state"]["type"]
+        when "info"
+          #play /pause
+          if message["state"]["state"]==0 
+            @properties[:state]="paused"
+          else
+            @properties[:state]="playing"
+          end
+          #position
+          @properties[:position] = message["state"]["pos"]
+          #volume =  / muted
+          if message["state"]["muted"]==0
+            @properties[:volume] = message["state"]["volume"]
+          else
+            @properties[:volume] = "muted"
+          end
+        when "raw_update"
+          @properties = {:client => @type, :state => message["state"]["update"], :volume => 0, :position => 0}
+        end
+        publish_properties
+        if @properties[:state]=="stopped"
+          @properties[:state]="idle"
+          publish_properties
+        end
+      end
+
+      def update_sdl(state)
         update_state(state)
       end
 
@@ -125,12 +157,12 @@ module Raspeomix
 
       def update_property(property_type, property)
         @properties[property_type] = property
-        publish_property(property_type, property)
+        publish_properties
         Raspeomix.logger.debug("#{property_type} changed to #{property}")
       end
 
-      def publish_property(property_type, property)
-        publish("/#{@properties[:type]}/out", { :type => :property_update, property_type => property })
+      def publish_properties
+        publish("/#{@properties[:client]}/out", { :type => :client_update, :properties => @properties})
       end
 
     end

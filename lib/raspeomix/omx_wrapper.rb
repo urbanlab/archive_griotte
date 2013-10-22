@@ -8,6 +8,7 @@ require 'eventmachine'
 require 'faye'
 require 'json'
 require 'raspeomix/liveprocess'
+require 'raspeomix/rpn_calculator'
 
 module Raspeomix
 
@@ -28,78 +29,94 @@ module Raspeomix
       @hostname = `hostname`.chomp
     end
 
+    def publish_omx_state(msg)
+      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => read_omx_state(msg)})
+    end
+
+    def read_omx_state(msg)
+      hash = {}
+      if (msg.split(',')[0][0]=='d') #checking this is actually an information line
+        hash["type"] = "info"
+        msg.split(',').each { |item|
+          hash[item.split(':')[0]] = item.split(':')[1]
+        }
+      elsif (msg.split(',')[0]=="omx")
+        hash["type"] = "raw_update"
+        hash["update"] = msg.split(',')[1]
+      end
+      return hash
+    end
+
+    def get_info
+      send_char('?')
+    end
+
+    def send_char(char)
+      @iq.push(char)
+    end
+
     def load(file)
       @iq = EM::Queue.new
       @oq = EM::Queue.new
       EM.add_periodic_timer(0.1) {
         @oq.pop {
-          |omxmsg| send_omx_state(omxmsg)
+          |omxmsg| publish_omx_state(omxmsg)
         }
       }
+      EM.add_periodic_timer(1) {
+        get_info
+      }
       @file = file
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :ready })
-    end
-
-    def send_omx_state(msg)
-      case msg.split[0]
-      when "Video"
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing })
-      when "have"
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :stopped })
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :idle })
-      when "Current"
-        @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_level, :level => msg.split[3] })
-      end
     end
 
     def start(time) #time not used for now
-      EM.popen("omxplayer -s #{@file}", EM::LiveProcess, @iq, @oq)
-#      @fifo.start
+      EM.popen("/home/pi/omxplayer #{@file}", EM::LiveProcess, @iq, @oq)
       @playing = true
- #     @iq.push('q')
       return true
     end
 
     def play
       toggle_pause unless @playing
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :playing })
       return true
     end
 
     def pause
       toggle_pause unless !@playing
-      @client.publish("/#{@hostname}/#{@type}/handler", { :type => :omx_state, :state => :paused })
       return true
-    end
-
-    def toggle_pause
-      @iq.push(PAUSECHAR)
-      @playing = !@playing
     end
 
     def stop
       @iq.push(QUITCHAR)
-      #sleep 1
-      #@fifo.close
-      #can be done better
-      #Process::waitpid(@pipe.pid)
       return true
     end
 
     def set_level(lvl)
-      if lvl==0
-        lvl=1
+      case lvl
+      when 0..10
+        send_char('A')
+      when 10..20
+        send_char('B')
+      when 20..30
+        send_char('C')
+      when 30..40
+        send_char('D')
+      when 40..50
+        send_char('E')
+      when 50..60
+        send_char('F')
+      when 60..70
+        send_char('G')
+      when 70..80
+        send_char('H')
+      when 80..90
+        send_char('I')
+      when 90..100
+        send_char('J')
       end
-      lvl = Math.log10(lvl.to_f/100)*10 #percent to db
-      real_lvl = (lvl/3).round*3 #OMXPlayer changes level per 3db (7db -> 6db or -20db -> -21db)
-      while @level != real_lvl
-        if @level > real_lvl
-          @iq.push(LVLDWN)
-          @level -= 3
-        else
-          @iq.push(LVLUP)
-          @level += 3
-        end
+
+      def toggle_pause
+        @iq.push(PAUSECHAR)
+        @playing = !@playing
       end
       return true
     end
