@@ -69,28 +69,62 @@
   z-index:3;
 }
 
-#opened {
+#start-0 {
   left:10em;
   top:12em;
 }
 
-#phone1 {
+#start-1 {
+  left:12em;
+  top:10em;
+}
+
+#start-2 {
+  left:5em;
+  top:22em;
+}
+
+#analog0-0{
   left:35em;
   top:12em;
   width:7em;
 }
-#inperson {
+
+#video-0 {
   left:12em;
   top:23em;
 }
-#phone2 {
+
+#sound-0{
   left:28em;
   top:24em;
 }
-#rejected {
+
+#image-0 {
   left:10em;
   top:35em;
 }
+
+#pause-0 {
+  left:25em;
+  top:20em;
+}
+
+#io-0 {
+  left:30em;
+  top:15em;
+}
+
+#io-1 {
+  left:20em;
+  top:35em;
+}
+
+#time-1 {
+  left:30em;
+  top:35em;
+}
+
 .dragHover { border:2px solid orange; }
 
 path { cursor:pointer; }

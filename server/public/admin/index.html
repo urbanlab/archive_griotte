@@ -26,33 +26,6 @@
     <script src="/faye/client.js" type="text/javascript"></script>
   </head>
   <body>
-    <div data-role="page" id="live">
-      <div data-role="header">
-
-        <h1>Raspeomix</h1>
-        <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
-        <div data-role="navbar" data-iconpos="bottom">
-          <ul>
-            <li><a href="#" data-icon="star" class="ui-state-persist ui-btn-active">Live</a></li>
-            <li><a href="#control" data-icon="grid">Contrôle</a></li>
-            <li><a href="#scenario" data-icon="gear">Scenario</a></li>
-            <li><a href="#cartels" data-icon="info">Cartels</a></li>
-            <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
-          </ul>
-        </div><!-- /navbar -->
-
-      </div>
-
-      <div data-role="content">
-
-        Playing </strong>videofinale.mp4</strong>
-
-        <label for="slider-4">Progression</label>
-        <input name="slider-4" id="slider-4" data-mini="true" min="0" max="100" value="50" type="range" data-highlight="true">
-
-      </div> <!-- content -->
-    </div> <!-- page live -->
-
     <div data-role="page" id="control">
       <div data-role="header">
 
@@ -61,7 +34,6 @@
 
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
-            <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#" data-icon="grid" class="ui-state-persist ui-btn-active">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
             <li><a href="#cartels" data-icon="info">Cartels</a></li>
@@ -71,28 +43,43 @@
       </div> <!-- header -->
 
       <div data-role="content">
-        <div>
-          <img id="heartbeat" height=44 width=49 src="/img/raspberry_pi.png">
+        <h3>En cours</h3>
+        Vidéo <em>(videofinale.mp4 - 123 s)</em>
+        <div data-role="fieldcontain">
+          <label for="slider-current">Progression (s)</label>
+          <input name="slider-current" id="slider-current" data-mini="true" min="0" max="123" value="57" type="range" data-highlight="true">
         </div>
 
+        <h3>À suivre</h3>
+        Capteur AN0
+        <div data-role="fieldcontain">
+          <div data-role="rangeslider" data-mini="true">
+            <label for="range-nexta">Distance | Maxbotix EZ-1 (cm)</label>
+            <input name="range-nexta" id="range-nexta" min="0" max="680" value="100" type="range" />
+            <label for="range-nextb">Distance | Maxbotix EZ-1 (cm)</label>
+            <input name="range-nextb" id="range-nextb" min="0" max="680" value="350" type="range" />
+          </div>
+        </div>
+
+        <h3>Réglages</h3>
         <form>
           <div data-role="fieldcontain">
-            <label for="toggle-scenario">Scenario</label>
-            <select name="toggle-scenario" id="toggle-scenario" data-role="slider">
-              <option value="pause">Off</option>
-              <option value="play">On</option>
+            <label for="toggle-scenario">Fonctionnement</label>
+            <select name="toggle-scenario" id="toggle-scenario" data-role="slider" data-mini="true">
+              <option value="pause">Pause</option>
+              <option value="play">Play</option>
             </select>
           </div>
           <div data-role="fieldcontain">
             <label for="toggle-sound">Son</label>
-            <select name="toggle-sound" id="toggle-sound" data-role="slider">
+            <select name="toggle-sound" id="toggle-sound" data-role="slider" data-mini="true">
               <option value="off">Off</option>
               <option value="on">On</option>
             </select>
           </div>
           <div data-role="fieldcontain">
-            <label for="slider-sound">Volume</label>
-            <input type="range" step="10" name="slider-sound" id="slider-sound" value="20" min="0" max="100" data-highlight="true">
+            <label for="slider-sound">Volume général (%)</label>
+            <input type="range" step="10" name="slider-sound" id="slider-sound" value="20" min="0" max="120" data-highlight="true" data-mini="true">
           </div>
         </form>
       </div> <!-- content -->
@@ -115,7 +102,6 @@
 
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
-            <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear" class="ui-state-persist ui-btn-active">Scenario</a></li>
             <li><a href="#cartels" data-icon="info">Cartels</a></li>
@@ -132,11 +118,17 @@
  
         <div id="plumb"> 
           <div id="render"></div>
-          <div class="w" id="opened">Départ<div class="ep"></div></div>
-          <div class="w" id="phone1">Capteur AN0<div class="ep"></div></div>
-          <div class="w" id="phone2">Lecture vidéo<div class="ep"></div></div>
-          <div class="w" id="inperson">Pause<div class="ep"></div></div>
-          <div class="w" id="rejected">Capteur IO1<div class="ep"></div></div> 
+          <div class="w" id="start-0">Départ<div class="ep"></div></div>
+          <div class="w" id="start-1">Départ<div class="ep"></div></div>
+          <div class="w" id="start-2">Départ<div class="ep"></div></div>
+          <div class="w" id="analog0-0">Capteur AN0<div class="ep"></div></div>
+          <div class="w" id="video-0">Lecture vidéo<div class="ep"></div></div>
+          <div class="w" id="sound-0">Lecture son<div class="ep"></div></div>
+          <div class="w" id="image-0">Lecture son<div class="ep"></div></div>
+          <div class="w" id="pause-0">Pause<div class="ep"></div></div>
+          <div class="w" id="io-0">Capteur IO0<div class="ep"></div></div> 
+          <div class="w" id="io-1">Capteur IO1<div class="ep"></div></div> 
+          <div class="w" id="time-1">Heure<div class="ep"></div></div> 
         </div>
 
       </div> <!-- content -->
@@ -150,7 +142,6 @@
         <a href="index.html" data-icon="delete" data-mini="true" class="ui-btn-right">Logout</a>
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
-            <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
             <li><a href="#cartels" data-icon="info" class="ui-state-persist ui-btn-active">Cartels</a></li>
@@ -182,7 +173,6 @@
 
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
-            <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
             <li><a href="#cartels" data-icon="info">Cartels</a></li>
@@ -348,6 +338,15 @@
   Raspberry.init(Bayeux);
   Raspberry.launch();
 
+  });
+</script>
+
+<script type="text/javascript">
+  // Mock
+  $( document ).bind( "pageinit", function( event ) {
+      $( "#slider-current" ).slider({ disabled: true });
+      $( "#range-nexta" ).slider({ disabled: true });
+      $( "#range-nextb" ).slider({ disabled: true });
   });
 </script>
 

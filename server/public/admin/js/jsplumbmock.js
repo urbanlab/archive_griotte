@@ -58,7 +58,25 @@ $( document ).bind( "pageinit", function() {
   });
       
   // and finally, make a couple of connections
-//  jsPlumb.connect({ source:"opened", target:"phone1" });
- // jsPlumb.connect({ source:"phone1", target:"inperson" });            
+  //jsPlumb.connect({ 
+  //  source:"start-0", 
+  //  target:"analog0-0",
+  //  overlays: [[ "Label", { label:"gooo", id:"label", cssClass:"aLabel" }]]
+  //});
+
+  //jsPlumb.connect({ source:"analog0-0", target:"video-0", overlays: [[ "Label", { label:"distance < 100 cm", id:"label", cssClass:"aLabel" }]] });            
+ 
+//          <div class="w" id="start-0">Départ<div class="ep"></div></div>
+//          <div class="w" id="start-1">Départ<div class="ep"></div></div>
+//          <div class="w" id="start-2">Départ<div class="ep"></div></div>
+//          <div class="w" id="analog0-0">Capteur AN0<div class="ep"></div></div>
+//          <div class="w" id="video-0">Lecture vidéo<div class="ep"></div></div>
+//          <div class="w" id="sound-0">Lecture son<div class="ep"></div></div>
+//          <div class="w" id="image-0">Lecture son<div class="ep"></div></div>
+//          <div class="w" id="pause-0">Pause<div class="ep"></div></div>
+//          <div class="w" id="io-0">Capteur IO0<div class="ep"></div></div> 
+//          <div class="w" id="io-1">Capteur IO1<div class="ep"></div></div> 
+//          <div class="w" id="time-1">Heure<div class="ep"></div></div> 
+
 });
 
