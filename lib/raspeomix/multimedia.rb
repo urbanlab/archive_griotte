@@ -35,7 +35,8 @@ module Raspeomix
         @handler.send_char char
       end
 
-      def load(file)
+      def load(args)
+        file = args[0]
         if @handler.load(file)
           update_state(:ready?)
         else
@@ -44,8 +45,11 @@ module Raspeomix
         end
       end
 
-      def start(time)
-        if @handler.start(time)
+      def start(args)
+        time=args[0]
+        level=to_db(args[1])
+        Raspeomix.logger.debug("starting client, args : time : #{time}, level : #{level}")
+        if @handler.start(time, level)
           update_state(:playing?)
         else
           Raspeomix.logger.error("error while starting #{self.name} client")
@@ -80,7 +84,8 @@ module Raspeomix
         end
       end
 
-      def set_level(level)
+      def set_level(args)
+        level = args[0]
         if @handler.set_level(level)
           #update_level(level+"?") TODO
         else
@@ -103,7 +108,7 @@ module Raspeomix
         Raspeomix.logger.debug("message received : #{message}")
         if message["type"] == "command"
           if method(message["action"]).arity != 0
-            self.send(message["action"], message["arg"])
+            self.send(message["action"], message["args"])
           else
             self.send(message["action"])
           end
@@ -128,11 +133,7 @@ module Raspeomix
           #position
           @properties[:position] = message["state"]["pos"]
           #volume =  / muted
-          if message["state"]["muted"]==0
-            @properties[:volume] = message["state"]["volume"]
-          else
-            @properties[:volume] = "muted"
-          end
+          @properties[:volume] = to_percent(message["state"]["volume"].to_i)
         when "raw_update"
           @properties = {:client => @type, :state => message["state"]["update"], :volume => 0, :position => 0}
         end
@@ -140,6 +141,68 @@ module Raspeomix
         if @properties[:state]=="stopped"
           @properties[:state]="idle"
           publish_properties
+        end
+      end
+
+      def to_db(vol)
+        case vol
+        when "muted"
+          return -6000
+        when 0..10
+          return -4605
+        when 10..20
+          return -3218
+        when 20..30
+          return -2407
+        when 30..40
+          return -1832
+        when 40..50
+          return -1386
+        when 50..60
+          return -1021
+        when 60..70
+          return -713
+        when 70..80
+          return -446
+        when 80..90
+          return -210
+        when 90..100
+          return 0
+        when 100..110
+          return 190
+        when 110..120
+          return 364
+        end
+      end
+
+      def to_percent(vol)
+        case vol
+        when -6000
+          return "muted"
+        when -4605
+          return 10
+        when -3218
+          return 20
+        when -2407
+          return 30
+        when -1832
+          return 40
+        when -1386
+          return 50
+        when -1021
+          return 60
+        when -713
+          return 70
+        when -446
+          return 80
+        when -210
+          return 90
+        when 0
+          return 100
+        when 190
+          return 110
+        when 364
+          return 120
         end
       end
 

@@ -17,7 +17,7 @@
   },
   {
     "step": "read_media",
-    "file": "/home/pi/dev/raspeomix/medias/kitten.mp4",
+    "file": "/home/pi/dev/raspeomix/medias/videofinale.mp4",
     "mediatype": "video",
     "time": 0,
     "loop" : 0

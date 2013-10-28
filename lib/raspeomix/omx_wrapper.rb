@@ -27,6 +27,8 @@ module Raspeomix
       @client = Faye::Client.new("http://#{host}:#{port}/faye")
       @file = nil
       @hostname = `hostname`.chomp
+      @iq = EM::Queue.new
+      @oq = EM::Queue.new
     end
 
     def publish_omx_state(msg)
@@ -69,8 +71,8 @@ module Raspeomix
       @file = file
     end
 
-    def start(time) #time not used for now
-      EM.popen("/home/pi/omxplayer #{@file}", EM::LiveProcess, @iq, @oq)
+    def start(time,level) #time not used for now
+      EM.popen("/home/pi/omxplayer --vol #{level} #{@file}", EM::LiveProcess, @iq, @oq)
       @playing = true
       return true
     end
@@ -90,35 +92,45 @@ module Raspeomix
       return true
     end
 
-    def set_level(lvl)
-      case lvl
+    def vol_to_command(vol)
+      case vol
+      when "muted"
+        return 'A'
       when 0..10
-        send_char('A')
+        return 'B'
       when 10..20
-        send_char('B')
+        return 'C'
       when 20..30
-        send_char('C')
+        return 'D'
       when 30..40
-        send_char('D')
+        return 'E'
       when 40..50
-        send_char('E')
+        return 'F'
       when 50..60
-        send_char('F')
+        return 'G'
       when 60..70
-        send_char('G')
+        return 'H'
       when 70..80
-        send_char('H')
+        return 'I'
       when 80..90
-        send_char('I')
+        return 'J'
       when 90..100
-        send_char('J')
+        return 'K'
+      when 100..110
+        return 'L'
+      when 110..120
+        return 'M'
       end
+    end
 
-      def toggle_pause
-        @iq.push(PAUSECHAR)
-        @playing = !@playing
-      end
+    def set_level(lvl)
+      @iq.push(vol_to_command(lvl))
       return true
+    end
+
+    def toggle_pause
+      @iq.push(PAUSECHAR)
+      @playing = !@playing
     end
 
   end

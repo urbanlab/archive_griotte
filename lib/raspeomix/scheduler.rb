@@ -20,6 +20,7 @@ module Raspeomix
         Raspeomix.logger.debug("initializing...")
         start_client('localhost', 9292)
         @server_add = "http://localhost:9292/faye"
+        @global_vol = 100
         register
       end
 
@@ -29,31 +30,51 @@ module Raspeomix
         play_step
       end
 
-      def isplaying?
-        return @playing
+      def subscribe_to_clients
+
+      end
+
+      def instanciate_clients
+
       end
 
       def register
         Raspeomix.logger.debug("registering...")
-        subscribe("/video/out") { |message| check_next_step(message) }
-        subscribe("/image/out") { |message| check_next_step(message) }
-        subscribe("/sensors/analog/an0") { |message| check_next_step(message) }
+        subscribe("/video/out") { |message| handle_client_message(message) }
+        subscribe("/image/out") { |message| handle_client_message(message) }
+        subscribe("/sensors/analog/an0") { |message| handle_client_message(message) }
         subscribe("/sound") {|message| handle_sound_command(message) }
         subscribe("/scenario") {|message| handle_scenario_command(message) }
         Raspeomix.logger.debug("registered")
       end
 
+      def handle_client_message(message)
+        check_next_step(message)
+        check_sound(message)
+      end
+
+      def check_sound(message)
+        unless message["client"]==nil
+          if message["client"]=="video" or message["client"]=="sound"
+            if message["properties"]["volume"]!=@global_vol
+              Raspeomix.logger.debug("received volume (#{message["properties"]["volume"]}) does not match global volume, setting it to #{@global_vol}")
+              set_level(message["properties"]["client"], @global_vol)
+            end
+          end
+        end
+      end
+
       def check_next_step(message)
         Raspeomix.logger.debug (" ------------------ received message : #{message}.")
         if message["type"] == "client_update"
-          if compare(@scenario_handler.next_step_conditions, message["properties"])
+          if compare_conditions(@scenario_handler.next_step_conditions, message["properties"])
             @scenario_handler.go_to_next_step
             play_step
           end
         end
       end
 
-      def compare(conditions_array, message)
+      def compare_conditions(conditions_array, message)
         bool = true
         conditions_array.each { |conditions|
           conditions.keys.each { |key|
@@ -80,13 +101,15 @@ module Raspeomix
       end
 
       def load(file, client)
+        args=[file]
         Raspeomix.logger.debug("loading #{file} on #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :load, :arg => file })
+        publish("/#{client}/in", { :type => :command, :action => :load, :args => args })
       end
 
-      def start(client, time)
+      def start(client, time, vol)
+        args=[time,vol]
         Raspeomix.logger.debug("starting #{client}")
-        publish("/#{client}/in", { :type => :command, :action => :start, :arg => time })
+        publish("/#{client}/in", { :type => :command, :action => :start, :args => args })
       end
 
       def play(client)
@@ -104,91 +127,43 @@ module Raspeomix
         publish("/#{client}/in", { :type => :command, :action => :stop })
       end
 
+      def set_level(client, level)
+        Raspeomix.logger.debug("setting #{client} level to #{level}")
+        publish("/#{client}/in", { :type => :command, :action => :set_level, :args => [level]})
+        set_global_level(level)
+      end
+
       def stop_scenario
         Raspeomix.logger.debug("ending scenario")
         publish("/#{@scenario_handler.current_step[:mediatype]}/in", { :type => :command, :action => :stop })
         @playing = false
       end
 
-      def set_level(level, client)
-        Raspeomix.logger.debug("setting #{client} level to #{level}")
-        publish("/#{client}/in", { :type => :command, :action => :set_level, :arg => level })
-      end
-
-      def handle_client_message(client, message)
-        if isplaying?
-          #parse json message
-          #start client if ready
-          if message["type"]=="property_update" and message["state"]=="ready"
-            case message["state"]
-            when "ready" then
-              start(client, @scenario_handler.current_step[:time]) if @scenario_handler.is_client_active?(client)
-              #load next media or wait for next event if conditions are fullfilled
-            when "..." then
-              #...
-            end
-          else
-            @scenario_handler.next_step_conditions.each { |condition|
-              if client.to_s == condition[:expected_client].to_s and check_condition(client.to_s, message, condition[:condition])
-                @scenario_handler.go_to_next_step
-                play_step
-              end
-            }
-          end
-        else
-          Raspeomix.logger.debug (" ------------------ client \"#{client}\" sent message : #{message}, no scenario playing, ignoring message.")
-        end
-      end
-
-      def check_condition(client, message, condition)
-        case client
-        when "image", "sound", "video"
-          return message["state"] == condition
-        else #TODO : mettre la vraie condition
-          if condition[0] == "down"
-            return message["analog_value"]["converted_value"].to_i>condition[1]
-          else
-            return message["analog_value"]["converted_value"].to_i<condition[1]
-          end
-        end
+      def set_global_level(level)
+        @global_vol = level
       end
 
       def handle_sound_command(message)
-        Raspeomix.logger.debug (" ------------------ command received : #{message}.")
-        if message["state"]=="off"
-          level = 0
-        else
-          level = message["level"]
+        Raspeomix.logger.debug (" ------------------ /sound channel received : #{message}.")
+        case message["type"]
+        when "set_level"
+          set_level(@scenario_handler.current_step[:mediatype], message["level"])
+        when "mute"
+          set_level(@scenario_handler.current_step[:mediatype], 0)
         end
-        set_level(level, @scenario_handler.current_step[:mediatype])
+      end
+
+      def to_percent
+
       end
 
       def handle_scenario_command(message)
-        Raspeomix.logger.debug (" ------------------ command received: #{message}.")
+        Raspeomix.logger.debug (" ------------------ /scenario channel received: #{message}.")
         case message["command"]
         when "pause"
           pause(@scenario_handler.current_step[:mediatype])
         when "play"
           play(@scenario_handler.current_step[:mediatype])
-        end
-      end
-
-      def handle_input_message(message)
-        Raspeomix.logger.debug (" ------------------ sensor sent message : #{message}")
-        if message["type"]=="event"
-          case message["event"]
-          when "pause"
-            pause(@scenario_handler.playing_media[:type])
-          when "play"
-            play(@scenario_handler.playing_media[:type])
-          when "stop"
-            case message["arg"]
-            when "media"
-              stop(@scenario_handler.playing_media[:type])
-            when "all"
-              stop_scenario
-            end
-          end
         end
       end
 
@@ -200,10 +175,10 @@ module Raspeomix
         case @scenario_handler.current_step[:step]
         when "read_media"
           load(@scenario_handler.current_step[:file], @scenario_handler.current_step[:mediatype])
-          start(@scenario_handler.current_step[:mediatype], 0)
+          start(@scenario_handler.current_step[:mediatype], 0, @global_vol)
         when "pause_reading"
           load("black", "image")
-          start("image", @scenario_handler.current_step[:time])
+          start("image", @scenario_handler.current_step[:time], @global_vol)
         when "wait_for_event"
           Raspeomix.logger.debug("waiting for event")
         end

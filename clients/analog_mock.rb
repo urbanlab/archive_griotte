@@ -21,9 +21,11 @@ EM.run {
 
    EM.add_periodic_timer(1){
      @client.publish("/#{@hostname}/sensors/analog/an0", message)
+     Raspeomix.logger.debug("sending message : #{message}")
    }
    EM.add_periodic_timer(10){
      @client.publish("/#{@hostname}/sensors/analog/an0", message2)
+     Raspeomix.logger.debug("sending message : #{message2}")
    }
 #   EM.add_timer(10){
 #     @client.publish("/#{@hostname}/sound", {:state=>:on, :level=>0})

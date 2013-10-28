@@ -19,6 +19,7 @@ module Raspeomix
       @index = 0
       @loopindex = 0
       #list all available scenarios in @scenarios
+      :wq
       @scenarios = retrieve_scenarios(scenario_path)
       @playing_scenario = choose_default(@scenarios)
 
@@ -27,6 +28,8 @@ module Raspeomix
 
     end
 
+    #gathers all scenarios available in path
+    #
     def retrieve_scenarios(path)
       paths = []
       scenarios = []
@@ -77,13 +80,13 @@ module Raspeomix
     end
 
     #returns RPN expression needed to check if sensor value is in the proper range
+    #
     def get_RPNexp
       if @current_step[:value] == "up"
         return "x #{@current_step[:threshold]} <"
       else
         return "x #{@current_step[:threshold]} >"
       end
-      #return [@current_step[:value], @current_step[:threshold]]
     end
 
     def is_client_active?(client)
