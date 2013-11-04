@@ -15,12 +15,11 @@ module Raspeomix
     attr_reader :current_step
 
     def initialize(scenario_path)
-      @key_path = "/dev/sda"
-      @media_path = "/media/external"
       @scenarios = []
       @index = 0
       @loopindex = 0
       #list all available scenarios in @scenarios
+      :wq
       @scenarios = retrieve_scenarios(scenario_path)
       @playing_scenario = choose_default(@scenarios)
 
@@ -29,7 +28,9 @@ module Raspeomix
 
     end
 
-    def retrieve_scenarios (path)
+    #gathers all scenarios available in path
+    #
+    def retrieve_scenarios(path)
       paths = []
       scenarios = []
       Find.find(path) do |path|
@@ -69,20 +70,24 @@ module Raspeomix
       conditions = []
       case @current_step[:step]
       when "read_media"
-        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
+        conditions << {"client" => @current_step[:mediatype], "state" => "stopped"}
       when "pause_reading"
-        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
+        conditions << {"client" => @current_step[:mediatype], "state" => "stopped"}
       when "wait_for_event"
-        conditions << {:expected_client => "#{@current_step[:path]}", :condition => check_event}
+        conditions << {"client" => @current_step[:path], "RPN_condition" => { "checked_value" => "converted_value", "RPNexp" => get_RPNexp }}
       end
       return conditions
     end
 
-    def check_event
-      return [@current_step[:value], @current_step[:threshold]]
+    #returns RPN expression needed to check if sensor value is in the proper range
+    #
+    def get_RPNexp
+      if @current_step[:value] == "up"
+        return "x #{@current_step[:threshold]} <"
+      else
+        return "x #{@current_step[:threshold]} >"
+      end
     end
-
-
 
     def is_client_active?(client)
       if @current_step[:mediatype].to_s == client.to_s then

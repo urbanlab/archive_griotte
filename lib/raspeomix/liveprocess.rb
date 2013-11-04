@@ -4,13 +4,10 @@
 
 require 'eventmachine'
 
-def log *message
-  p [Time.now, *message]
-end
-
 module EventMachine
 
-  OMX_REGEXP = /.*[^\r]\n/
+ # OMX_REGEXP = /.*[^\r]\n/
+  OMX_REGEXP = /duration.*/
 
   class LiveProcess < EM::Connection
 
@@ -20,6 +17,8 @@ module EventMachine
       @input_queue = i_queue
       @output_queue = o_queue
       input_check_loop
+      @output_queue.push("omx,ready")
+      @stopped = false
     end
 
     def receive_data data
@@ -29,19 +28,15 @@ module EventMachine
     end
 
     def unbind
+      @output_queue.push("omx,stopped")
+      @stopped = true
     end
 
     def input_check_loop
-#       EM.add_periodic_timer(0.1) {
-#         @input_queue.pop { |char|
-#           puts "sending #{char} to omxplayer"
-#           send_data(char)
-#         }
-#       }
       @input_queue.pop { |char|
         send_data(char)
-        input_check_loop
-     }
+        input_check_loop unless @stopped
+      }
     end
   end
 

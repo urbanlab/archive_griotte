@@ -1,25 +1,25 @@
 <!DOCTYPE html> 
 <html>
   <head>
-    <link rel="icon" type="image/png" href="img/raspberry_pi.png">
+    <link rel="icon" type="image/png" href="/img/raspberry_pi.png">
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
 
     <title>Raspeomix Server</title>
-    <link rel="stylesheet" href="css/jquery.mobile-1.3.2.css" type="text/css" media="screen">
-    <script src="js/jquery-1.9.1.js" type="text/javascript"></script>
-    <script src="js/jquery.mobile-1.3.1.js" type="text/javascript"></script>
-    <script src="js/raspberry.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/css/jquery.mobile-1.3.2.css" type="text/css" media="screen">
+    <script src="/js/jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="/js/jquery.mobile-1.3.1.js" type="text/javascript"></script>
+    <script src="/admin/js/raspberry.js" type="text/javascript"></script>
     <script src="/faye/client.js" type="text/javascript"></script>
   </head>
   <body>
     <div data-role="page" id="live">
       <div data-role="header">
 
-        <h1>Raspeomix</h1>
+        <h1>Raspeomixx</h1>
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
-            <li><a href="#live" data-icon="star" class="ui-btn-active">Live</a></li>
+            <li><a href="#" data-icon="star" class="ui-state-persist ui-btn-active">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
@@ -45,7 +45,7 @@
         <div data-role="navbar" data-iconpos="bottom">
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
-            <li><a href="#control" data-icon="grid" class="ui-btn-active">Contrôle</a></li>
+            <li><a href="#" data-icon="grid" class="ui-state-persist ui-btn-active">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
           </ul>
@@ -54,7 +54,7 @@
 
       <div data-role="content">
         <div>
-          <img id="heartbeat" height=44 width=49 src="img/raspberry_pi.png">
+          <img id="heartbeat" height=44 width=49 src="/img/raspberry_pi.png">
         </div>
 
         <form>
@@ -93,7 +93,7 @@
           <ul>
             <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
-            <li><a href="#scenario" data-icon="gear" class="ui-btn-active">Scenario</a></li>
+            <li><a href="#scenario" data-icon="gear" class="ui-state-persist ui-btn-active">Scenario</a></li>
             <li><a href="#monitor" data-icon="alert">Moniteur</a></li>
           </ul>
         </div><!-- /navbar -->
@@ -114,7 +114,7 @@
             <li><a href="#live" data-icon="star">Live</a></li>
             <li><a href="#control" data-icon="grid">Contrôle</a></li>
             <li><a href="#scenario" data-icon="gear">Scenario</a></li>
-            <li><a href="#monitor" data-icon="alert" class="ui-btn-active">Moniteur</a></li>
+            <li><a href="#monitor" data-icon="alert" class="ui-state-persist ui-btn-active">Moniteur</a></li>
           </ul>
         </div><!-- /navbar -->
 
@@ -204,6 +204,12 @@
             </textarea>
           </div> <!-- collapsible -->
         </div> <!-- collapsible-set -->
+        <div data-role="footer">
+          <div align="right">
+            <!--<button id="login" data-theme="a" type="button" href="home.html" data-mini="false" data-inline="true" >Login</button>-->
+            <a href="/logout/" data-role="button" data-icon="delete" data-iconpos="notext" data-inline="true" data-ajax="false">logout</a>
+          </div>
+        </div>
 
       </div> <!-- content -->
     </div> <!-- page monitor -->
