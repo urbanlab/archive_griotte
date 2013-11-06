@@ -1,5 +1,5 @@
 require 'logger'
-require 'faye'
+#require 'faye'
 
 class NullObject
   def method_missing(*args, &block)

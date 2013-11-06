@@ -6,7 +6,7 @@ require 'eventmachine'
 require 'json'
 EM.run {
   @hostname=`hostname`.chomp
-  @client=Faye::Client.new("http://localhost:9292/faye")
+  @client=Faye::Client.new("http://localhost:#{ENV['RASP_PORT']}/faye")
 
   message = { :type => "client_update", :properties => {
                 :client => "/sensors/analog/an0",

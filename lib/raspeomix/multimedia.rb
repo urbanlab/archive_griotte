@@ -1,13 +1,11 @@
 #!/usr/bin/env ruby
-
-require 'raspeomix/fayeclient'
 #
 #multimedia client for Raspéomix
 #can be used to read images, sound and video
 
+require 'raspeomix/fayeclient'
 require 'eventmachine'
 require 'faye'
-require 'json'
 
 module Raspeomix
 
@@ -19,20 +17,12 @@ module Raspeomix
 
       def initialize(type, handler)
         @type = type
-        @properties = {:client => @type, :state => :initializing, :volume => 0, :position => 0}
-        start_client('localhost', 9292)
+        @properties = {:client => @type, :state => :initializing, :volume => 0, :muted => 0, :position => 0}
+        @level_buff = 0
+        start_client('localhost', ENV['RASP_PORT'])
         in_register(type)
         register("/#{type}/handler")
         @handler = handler
-      end
-
-      def update_wrapped_state(state)
-        Raspeomix.logger.debug("wrapper sent state : #{state}")
-        update_state(state)
-      end
-
-      def send_char(char) # for testing purposes only
-        @handler.send_char char
       end
 
       def load(args)
@@ -84,10 +74,23 @@ module Raspeomix
         end
       end
 
+      def mute
+        if @properties[:muted]==0
+          Raspeomix.logger.debug("muting multimedia client")
+          @level_buff = @properties[:volume]
+          @handler.mute
+          @properties[:muted]=1
+        else
+          Raspeomix.logger.debug("unmuting multimedia client")
+          set_level([@level_buff])
+          @properties[:muted]=0
+        end
+      end
+
       def set_level(args)
         level = args[0]
         if @handler.set_level(level)
-          #update_level(level+"?") TODO
+          @properties[:muted]=0
         else
           Raspeomix.logger.error("error while setting #{self.name} client level to #{level}")
           update_state(:error)
@@ -134,8 +137,9 @@ module Raspeomix
           @properties[:position] = message["state"]["pos"]
           #volume =  / muted
           @properties[:volume] = to_percent(message["state"]["volume"].to_i)
+          @properties[:mute] = message["state"]["muted"]
         when "raw_update"
-          @properties = {:client => @type, :state => message["state"]["update"], :volume => 0, :position => 0}
+          @properties = {:client => @type, :state => message["state"]["update"], :volume => 0, :muted =>0, :position => 0}
         end
         publish_properties
         if @properties[:state]=="stopped"
@@ -146,7 +150,7 @@ module Raspeomix
 
       def to_db(vol)
         case vol
-        when "muted"
+        when 0
           return -6000
         when 0..10
           return -4605
@@ -178,7 +182,7 @@ module Raspeomix
       def to_percent(vol)
         case vol
         when -6000
-          return "muted"
+          return 0
         when -4605
           return 10
         when -3218
@@ -232,19 +236,19 @@ module Raspeomix
 
     class Video < Multimedia
       def initialize
-        super(:video, OMXWrapper.new(:video, 'localhost', 9292))
+        super(:video, Wrapper::OMXWrapper.new(:video, 'localhost', ENV['RASP_PORT']))
       end
     end
 
     class Sound < Multimedia
       def initialize
-        super(:sound, OMXWrapper.new(:sound, 'localhost', 9292))
+        super(:sound, Wrapper::OMXWrapper.new(:sound, 'localhost', ENV['RASP_PORT']))
       end
     end
 
     class Image < Multimedia
       def initialize
-        super(:image, SDLWrapper.new('localhost', 9292))
+        super(:image, Wrapper::SDLWrapper.new('localhost', ENV['RASP_PORT']))
       end
     end
 

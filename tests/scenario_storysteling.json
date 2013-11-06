@@ -1,11 +1,19 @@
 {
-  "type": "raspeomix",
+  "file_type": "raspeomix_scenario",
   "version": "1.0.0",
   "id": "Storys",
   "priority": 1,
   "behavior": {
     "loop": true
   },
+  "init":[{
+    "client":"video",
+    "args":{"volume":"100"}
+  },
+  {
+    "client":"sensor",
+    "args":{"profile":"profile1","channel":"an0"}
+  }],
   "steps": [{
     "step": "wait_for_event",
     "type" : "sensor",

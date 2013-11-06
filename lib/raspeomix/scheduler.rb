@@ -3,10 +3,8 @@
 #scheduler for Raspéomix
 #handles synchronisation between events and multimedia clients
 
-require 'json'
 require 'eventmachine'
 require 'faye'
-require 'logger'
 
 module Raspeomix
 
@@ -16,11 +14,12 @@ module Raspeomix
 
       include FayeClient
 
-      def initialize
+      def initialize(start_vol = 100)
         Raspeomix.logger.debug("initializing...")
-        start_client('localhost', 9292)
-        @server_add = "http://localhost:9292/faye"
-        @global_vol = 100
+        start_client('localhost', ENV['RASP_PORT'])
+        @server_add = "http://localhost:#{ENV['RASP_PORT']}/faye"
+        @global_vol = start_vol
+        @muted = false
         register
       end
 
@@ -34,8 +33,10 @@ module Raspeomix
 
       end
 
-      def instanciate_clients
-
+      def instanciate_clients(client_array)
+        #client_array.each { |client|
+        #  case 
+        #}
       end
 
       def register
@@ -55,10 +56,13 @@ module Raspeomix
 
       def check_sound(message)
         unless message["client"]==nil
-          if message["client"]=="video" or message["client"]=="sound"
-            if message["properties"]["volume"]!=@global_vol
+          if (message["client"]=="video" or message["client"]=="sound")
+            if (message["properties"]["volume"]!=@global_vol and !@muted)
               Raspeomix.logger.debug("received volume (#{message["properties"]["volume"]}) does not match global volume, setting it to #{@global_vol}")
               set_level(message["properties"]["client"], @global_vol)
+            end
+            if (message["properties"]["muted"]!=@muted)
+              mute(message["properties"]["client"])
             end
           end
         end
@@ -130,7 +134,11 @@ module Raspeomix
       def set_level(client, level)
         Raspeomix.logger.debug("setting #{client} level to #{level}")
         publish("/#{client}/in", { :type => :command, :action => :set_level, :args => [level]})
-        set_global_level(level)
+      end
+
+      def mute(client)
+        Raspeomix.logger.debug("muting #{client}")
+        publish("/#{client}/in", { :type => :command, :action => :mute })
       end
 
       def stop_scenario
@@ -148,13 +156,13 @@ module Raspeomix
         case message["type"]
         when "set_level"
           set_level(@scenario_handler.current_step[:mediatype], message["level"])
+          set_global_level(message["level"])
+          @muted = false
         when "mute"
-          set_level(@scenario_handler.current_step[:mediatype], 0)
+          Raspeomix.logger.debug("seeting mute to #{@muted}")
+          mute(@scenario_handler.current_step[:mediatype])
+          @muted = !@muted
         end
-      end
-
-      def to_percent
-
       end
 
       def handle_scenario_command(message)

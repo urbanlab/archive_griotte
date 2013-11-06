@@ -1,0 +1,11 @@
+{
+  "file_type":"sensor_profiles",
+  "profiles":[{
+    "id":"profile1",
+    "name":"Maxbotix EZ-1",
+    "conversion_formula":"x 260.1 *",
+    "units":"cm",
+    "description":"Distance in cm",
+    "sensor_args":[3,":'12bits'"]
+  }]
+}

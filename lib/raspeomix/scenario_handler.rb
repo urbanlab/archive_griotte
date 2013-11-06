@@ -16,11 +16,11 @@ module Raspeomix
 
     def initialize(scenario_path)
       @scenarios = []
+      @profiles = []
       @index = 0
       @loopindex = 0
       #list all available scenarios in @scenarios
-      :wq
-      @scenarios = retrieve_scenarios(scenario_path)
+      retrieve_files(scenario_path, @scenarios, @profiles)
       @playing_scenario = choose_default(@scenarios)
 
       #get first step in the .json file
@@ -28,19 +28,24 @@ module Raspeomix
 
     end
 
-    #gathers all scenarios available in path
+    #gathers all scenarios and sensor profiles available in path
     #
-    def retrieve_scenarios(path)
+    def retrieve_files(path, scenarios, profiles)
       paths = []
-      scenarios = []
       Find.find(path) do |path|
         paths << path if path =~/.*\.json$/
       end
       paths.each do |path|
-        json = File.read(path)
-        scenarios << JSON.parse(json, :symbolize_names => true)
+        #json = File.read(path)
+        #scenarios << JSON.parse(json, :symbolize_names => true)
+        json = JSON.parse(File.read(path), :symbolize_names=>true)
+        case json[:file_type]
+        when "raspeomix_scenario"
+          scenarios << json
+        when "sensor_profiles"
+          profiles << json
+        end
       end
-      return scenarios
     end
 
     def choose_default(scenarios)
@@ -49,6 +54,17 @@ module Raspeomix
         default = scenario if (scenario[:priority] < default[:priority])
       end
       return default
+    end
+
+    #returns an array of all clients to be instanciated
+    #
+    def get_clients(scenarios)
+      clients = []
+      scenarios.each { |scenario|
+        scenario
+        client
+      }
+      return clients
     end
 
     #returns next step of the .json scenario
