@@ -6,7 +6,7 @@ require 'faye'
 me = ARGV[0] or `hostname`.chomp
 
 EM.run {
-  client = Faye::Client.new("http://192.168.0.103:9292/faye")
+  client = Faye::Client.new("http://192.168.0.103:#{ENV['RASP_LOG']}/faye")
 
   client.subscribe('/foo') do |message|
     puts message.inspect

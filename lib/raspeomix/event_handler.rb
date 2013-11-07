@@ -18,7 +18,7 @@ module Raspeomix
       def initialize(type)
         Raspeomix.logger.debug("starting event handler...")
         @properties = { :sensor_type => type }
-        start_client('localhost', 9292)
+        start_client('localhost', ENV['RASP_PORT'])
         start_sensor
       end
 

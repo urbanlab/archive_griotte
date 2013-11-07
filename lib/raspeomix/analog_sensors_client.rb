@@ -108,7 +108,7 @@ module Raspeomix
 
           raise ArgumentError, "BusID must be 0 or 1 (got #{@bus})" unless [0,1].include?(@bus)
           @i2c = I2C.create("/dev/i2c-#{@bus}")
-          Raspeomix.logger.info "MCP342x 0x%x initialized on bus %s" % [ @device, @bus ]
+          Raspeomix.logger.info("AnalogSensorsClient::MCP342x") { "MCP342x 0x%x initialized on bus %s" % [ @device, @bus ] }
         end
 
         # Retrieves digitized value from analog channel
@@ -126,19 +126,27 @@ module Raspeomix
 
           # Check arguments
           unless RESOLUTION.include?(resolution)
+            Raspeomix.logger.fatal("AnalogSensorsClient::MCP342x") {
+              "Rate/resolution must be 12bits, 14bits, 16bits, 18bits, 240sps, 60sps, 15sps or 3_75sps (was %s)" % resolution 
+            }
             raise ArgumentError, "Rate/resolution must be 12bits, 14bits, 16bits, 18bits, 240sps, 60sps, 15sps or 3_75sps (was %s)" % resolution
           end
 
           unless CHANNEL.include?(channel)
+            Raspeomix.logger.fatal("AnalogSensorsClient::MCP342x") {
+              "Channel must be one of an0, an1, an2 or an4i (was %s)" % channel
+            }
             raise ArgumentError, "Channel must be one of an0, an1, an2 or an4i (was %s)" % channel
           end
 
           unless PGA.include?(pga)
+            Raspeomix.logger.fatal("AnalogSensorsClient::MCP342x") {
+              "PGA setting must be one of 1x (default), 2x, 4x, 8x (was %s)" % pga
+            }
             raise ArgumentError, "PGA setting must be one of 1x (default), 2x, 4x, 8x (was %s)" % pga
           end
 
           # Initiate conversion
-          # Raspeomix.logger.debug "resolution/rate set to #{resolution}, pga to #{pga}"
           @i2c.write(@device, C_READY | CHANNEL[channel] | C_OC_MODE | RESOLUTION[resolution] | PGA[pga])
 
           if resolution == :'18bits' or resolution == :'3_75sps'
@@ -228,7 +236,7 @@ module Raspeomix
         def start
           @running = true
           if @rate != 0
-            Raspeomix.logger.debug "setting timer to trigger every %.2f seconds" % (1.0/rate)
+            Raspeomix.logger.debug("AnalogSensorsClient::Sensor") { "setting timer to trigger every %.2f seconds" % (1.0/rate) }
             @timer = EventMachine::PeriodicTimer.new(1.0/rate) {
               @value = @chip.sample(channel=@channel, resolution=@precision)
               notify_observers
@@ -334,8 +342,8 @@ module Raspeomix
       def update(sensor)
         value = sensor.value
         val = RPNCalculator.evaluate(sensor.profile.conversion_formula.gsub('x', value.to_s)) 
-        message = { :type => :analog_value,
-                    :analog_value => {
+        message = { :type => :client_update, :properties => {
+                      :client => "/sensors/analog/#{sensor.channel}",
                       :profile => sensor.profile.name,
                       :unit => sensor.profile.unit,
                       :raw_value => value,

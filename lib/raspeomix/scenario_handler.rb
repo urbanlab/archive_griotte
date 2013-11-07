@@ -15,13 +15,12 @@ module Raspeomix
     attr_reader :current_step
 
     def initialize(scenario_path)
-      @key_path = "/dev/sda"
-      @media_path = "/media/external"
       @scenarios = []
+      @profiles = []
       @index = 0
       @loopindex = 0
       #list all available scenarios in @scenarios
-      @scenarios = retrieve_scenarios(scenario_path)
+      retrieve_files(scenario_path, @scenarios, @profiles)
       @playing_scenario = choose_default(@scenarios)
 
       #get first step in the .json file
@@ -29,17 +28,24 @@ module Raspeomix
 
     end
 
-    def retrieve_scenarios (path)
+    #gathers all scenarios and sensor profiles available in path
+    #
+    def retrieve_files(path, scenarios, profiles)
       paths = []
-      scenarios = []
       Find.find(path) do |path|
         paths << path if path =~/.*\.json$/
       end
       paths.each do |path|
-        json = File.read(path)
-        scenarios << JSON.parse(json, :symbolize_names => true)
+        #json = File.read(path)
+        #scenarios << JSON.parse(json, :symbolize_names => true)
+        json = JSON.parse(File.read(path), :symbolize_names=>true)
+        case json[:file_type]
+        when "raspeomix_scenario"
+          scenarios << json
+        when "sensor_profiles"
+          profiles << json
+        end
       end
-      return scenarios
     end
 
     def choose_default(scenarios)
@@ -48,6 +54,17 @@ module Raspeomix
         default = scenario if (scenario[:priority] < default[:priority])
       end
       return default
+    end
+
+    #returns an array of all clients to be instanciated
+    #
+    def get_clients(scenarios)
+      clients = []
+      scenarios.each { |scenario|
+        scenario
+        client
+      }
+      return clients
     end
 
     #returns next step of the .json scenario
@@ -69,20 +86,24 @@ module Raspeomix
       conditions = []
       case @current_step[:step]
       when "read_media"
-        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
+        conditions << {"client" => @current_step[:mediatype], "state" => "stopped"}
       when "pause_reading"
-        conditions << {:expected_client => @current_step[:mediatype], :condition => "stopped"}
+        conditions << {"client" => @current_step[:mediatype], "state" => "stopped"}
       when "wait_for_event"
-        conditions << {:expected_client => "#{@current_step[:path]}", :condition => check_event}
+        conditions << {"client" => @current_step[:path], "RPN_condition" => { "checked_value" => "converted_value", "RPNexp" => get_RPNexp }}
       end
       return conditions
     end
 
-    def check_event
-      return [@current_step[:value], @current_step[:threshold]]
+    #returns RPN expression needed to check if sensor value is in the proper range
+    #
+    def get_RPNexp
+      if @current_step[:value] == "up"
+        return "x #{@current_step[:threshold]} <"
+      else
+        return "x #{@current_step[:threshold]} >"
+      end
     end
-
-
 
     def is_client_active?(client)
       if @current_step[:mediatype].to_s == client.to_s then
