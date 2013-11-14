@@ -20,11 +20,12 @@ module Raspeomix
         @server_add = "http://localhost:#{ENV['RASP_PORT']}/faye"
         @global_vol = start_vol
         @muted = false
-        register
       end
 
       def play_scenario(scenarios_path)
         @scenario_handler = ScenarioHandler.new(scenarios_path)
+        instanciate_clients(@scenario_handler.get_clients([@scenario_handler.playing_scenario]))
+        set_global_level(@scenario_handler.get_volume(@scenario_handler.playing_scenario))
         @playing = true
         play_step
       end
@@ -34,9 +35,37 @@ module Raspeomix
       end
 
       def instanciate_clients(client_array)
-        #client_array.each { |client|
-        #  case 
-        #}
+        client_array.each { |client|
+          case client[:client]
+          when "video"
+            instanciate_video
+            subscribe("/video/out") { |message| handle_client_message(message) }
+          when "image"
+            instanciate_image
+            subscribe("/image/out") { |message| handle_client_message(message) }
+          when "sensor"
+            instanciate_analog_sensor(profile, client[:args][:channel])
+            subscribe("/sensors/analog/#{client[:args][:channel]}") { |message| handle_client_message(message) }
+          end
+        }
+      end
+
+      def instanciate_analog_test
+        subscribe("/sensors/analog/test") { |message|handle_client_message(message) }
+      end
+
+      def instanciate_video
+        Video.new
+      end
+
+      def instanciate_image
+        #TODO
+      end
+
+      def instanciate_analog_sensor(profile, channel)
+        if args[:name]=="sim"
+          p=AnalogSensorsClient::SensorProfile.new(args)
+        end
       end
 
       def register

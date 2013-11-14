@@ -13,6 +13,8 @@ module Raspeomix
   class ScenarioHandler
 
     attr_reader :current_step
+    attr_reader :playing_scenario
+    attr_reader :profiles
 
     def initialize(scenario_path)
       @scenarios = []
@@ -25,7 +27,6 @@ module Raspeomix
 
       #get first step in the .json file
       @current_step = @playing_scenario[:steps][@index]
-
     end
 
     #gathers all scenarios and sensor profiles available in path
@@ -43,7 +44,7 @@ module Raspeomix
         when "raspeomix_scenario"
           scenarios << json
         when "sensor_profiles"
-          profiles << json
+          profiles << json["profiles"]
         end
       end
     end
@@ -59,16 +60,23 @@ module Raspeomix
     #returns an array of all clients to be instanciated
     #
     def get_clients(scenarios)
+      puts "scenarios are #{scenarios}"
       clients = []
       scenarios.each { |scenario|
-        scenario
-        client
+        scenario[:init].each { |client|
+          clients<<client
+        }
       }
+      puts "clients are #{clients}"
       return clients
     end
 
+    def get_volume(scenario)
+      return scenario[:volume]
+    end
+
     #returns next step of the .json scenario
-    #
+    #scenario
     def go_to_next_step
       #check if current step has to be played several times
       if (@current_step[:loop]>@loopindex)

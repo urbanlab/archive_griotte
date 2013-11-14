@@ -7,5 +7,8 @@
     "units":"cm",
     "description":"Distance in cm",
     "sensor_args":[3,":'12bits'"]
+  },{
+    "id":"profile2",
+    "name":"sim"
   }]
 }

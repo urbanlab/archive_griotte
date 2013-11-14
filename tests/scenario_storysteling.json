@@ -6,9 +6,10 @@
   "behavior": {
     "loop": true
   },
+  "volume":100,
   "init":[{
     "client":"video",
-    "args":{"volume":"100"}
+    "args":{}
   },
   {
     "client":"sensor",
